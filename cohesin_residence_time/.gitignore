@@ -214,3 +214,5 @@ $RECYCLE.BIN/
 infrastructure/apps/**/
 
 scratchpad/test_interactive.py
+
+../runs/example/ifrap_testing.npy
