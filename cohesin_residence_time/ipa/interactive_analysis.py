@@ -9,6 +9,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from scipy.interpolate import interp1d
+import yaml
 
 
 def zoomed_image(im, center, size):
@@ -44,12 +45,16 @@ def compute_lab (im_roi):
     return labels_final
 
 
-im = tiff.imread('/Volumes/tungsten/scratch/ggiorget/nessim/microscopy_data/FRAP_Rad21_halo/20231124_FRAP_WAPL_AID_NIPBL_FKBP/20231124_FRAP_NIPBL_FKBP_Rad21_Halo_561_1_conf561Triple-LP-FRAP.ome.tf2')
+with open('test_yaml.yml', 'r') as file:
+    params = yaml.safe_load(file)
+
+
+im = tiff.imread(params['im_path'])
 
 plt.waitforbuttonpress()
 fig,ax = plt.subplots(1,2,figsize=(15,5))
 ax[0].imshow(im[0,...],cmap='viridis')
-ax[1].imshow(im[5,...],cmap='viridis')
+ax[1].imshow(im[params['FRAP_frame'],...],cmap='viridis')
 ax[0].set_title('pre-FRAP image')
 ax[1].set_title('FRAP image')
 
@@ -57,11 +62,11 @@ if plt.waitforbuttonpress():
     plt.close()
 
 plt.waitforbuttonpress()
-number = input('How many cells (ROIs) do you want to analyze?')
+number = 1# input('How many cells (ROIs) do you want to analyze?')
 
 fig,ax = plt.subplots(1,2,figsize=(15,5))
 ax[0].imshow(im[0,...],cmap='viridis')
-ax[1].imshow(im[5,...],cmap='viridis')
+ax[1].imshow(im[params['FRAP_frame'],...],cmap='viridis')
 ax[0].set_title('pre-FRAP image')
 ax[1].set_title('FRAP image')
 
@@ -87,7 +92,7 @@ for coord in coords:
     c = [int(x) for x in list(coord)]
     # Use the function
     center = c # Replace with the actual coordinates
-    size = 100  # Replace with the actual size
+    size = params['size_of_bbox_zoom']  # Replace with the actual size
 
 
     zoomed_im = zoomed_image(im, center, size)
@@ -117,7 +122,7 @@ for coord in coords:
     print('Press any key to end the selection')
 
     for i in range(0,im_r.shape[0]):
-        if counter % 25 == 0 or i in [0,1,2,3,5,249]:
+        if counter % params['frame_actualization'] == 0 or i in params['frame_pre_bleach']:
             counter += 1
 
             # Display the image
@@ -125,8 +130,8 @@ for coord in coords:
             plt.imshow(im_r[i,...], cmap='viridis')
             plt.title(f'Frame {i}')
 
-            radius = 5
-            radius_b = 7
+            radius = params['radius_unbleach_spot']
+            radius_b = params['radius_bleach_spot']
             # Create a circle patch
             a = plt.ginput(2)
             x,y = a[0]
@@ -171,7 +176,7 @@ for coord in coords:
 
 
     # Original x values
-    x_values = np.array([0,1,2,3,5, 24, 49, 74, 99, 124, 149, 174, 199, 224, 249])
+    x_values = np.array(params['interpolation_values'])
 
     # Create interpolation function
     f_unbleach = interp1d(x_values, mean_list_unbleached, kind='linear')
@@ -204,5 +209,4 @@ for coord in coords:
     plt.legend()
     plt.show()
 
-print(ifrap)
-np.save('../runs/example/ifrap_testing.npy',ifrap)
+np.save(params['save_path']+'/'+params['name_of_experiment']+'.npy',ifrap)
