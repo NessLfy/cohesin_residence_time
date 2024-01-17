@@ -55,7 +55,7 @@ def main() -> None:
     save_path = questionary.path("Save path:").ask()
     if save_path == "": save_path = '/Users/louaness/Documents/cohesin_residence_time/cohesin_residence_time/runs/'
     
-    save_path = os.path.join(save_path)
+    confi = os.path.join(save_path,name_of_experiment ,CONFIG_NAME)
 
     config = {
         "name_of_experiment": name_of_experiment,
@@ -67,12 +67,10 @@ def main() -> None:
         "radius_unbleach_spot": radius_unbleach_spot,
         "radius_bleach_spot": radius_bleach_spot,
         "interpolation_values": interpolation_values,
-        "save_path": os.path.relpath(save_path,cwd)
+        "save_path": os.path.join(save_path,name_of_experiment)
     }
 
     os.makedirs(save_path+'/'+name_of_experiment, exist_ok=True)
-
-    confi = os.path.join(save_path,name_of_experiment ,CONFIG_NAME)
 
     with open(os.path.join(save_path,name_of_experiment ,CONFIG_NAME), "w") as f:
         yaml.safe_dump(config, f)
