@@ -215,4 +215,9 @@ infrastructure/apps/**/
 
 scratchpad/test_interactive.py
 
-../runs/example/ifrap_testing.npy
+/runs/example/ifrap_testing.npy
+
+/runs/*/*.npy
+/runs/*/*.csv
+
+.DS_Store
