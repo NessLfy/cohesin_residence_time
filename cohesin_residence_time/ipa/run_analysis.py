@@ -17,7 +17,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from scipy.interpolate import interp1d
-from utils.interactive_analysis_utils import zoomed_image, compute_lab
+from utils.interactive_analysis_utils import zoomed_image, compute_lab, overlap
 import questionary
 import os
 import pandas as pd
@@ -49,7 +49,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
          radius_unbleach_spot:int,radius_bleach_spot:int,
          interpolation_values:list,save_path:str,name_of_experiment:str) -> None:
     """
-    Run the preprocessing pipeline.
+    Run the analysis pipeline.
     
     Parameters
     ----------
@@ -66,19 +66,20 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     """
     logger = _create_logger(name="interactive analysis")
 
-    logger.info(f"Processing: {im_path}")
-    logger.info(f"Output directory: {save_path}")
+    logger.info(f"Processing: {im_path} \n")
+    
+    logger.info(f"Output directory: {save_path}\n")
 
-    logger.info(f"Name of experiment: {name_of_experiment}")
-    logger.info(f"FRAP frame: {FRAP_frame}")
-    logger.info(f"Size of bbox zoom: {size_of_bbox_zoom}")
-    logger.info(f"Frame actualization: {frame_actualization}")
-    logger.info(f"Frame pre bleach: {frame_pre_bleach}")
-    logger.info(f"Radius unbleach spot: {radius_unbleach_spot}")
-    logger.info(f"Radius bleach spot: {radius_bleach_spot}")
-    logger.info(f"Interpolation values: {interpolation_values}")
+    logger.info(f"Name of experiment: {name_of_experiment}\n")
+    logger.info(f"FRAP frame: {FRAP_frame}\n")
+    logger.info(f"Size of bbox zoom: {size_of_bbox_zoom}\n")
+    logger.info(f"Frame actualization: {frame_actualization}\n")
+    logger.info(f"Frame pre bleach: {frame_pre_bleach}\n")
+    logger.info(f"Radius unbleach spot: {radius_unbleach_spot}\n")
+    logger.info(f"Radius bleach spot: {radius_bleach_spot}\n")
+    logger.info(f"Interpolation values: {interpolation_values}\n")
 
-    logger.info(f"Loading image: {im_path}")
+    logger.info(f"Loading image: {im_path}\n")
 
     # Load the image
     im = tiff.imread(im_path)
@@ -100,13 +101,13 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
 
     plt.waitforbuttonpress()
 
-    logger.info(f"Image shape: {im.shape}")
+    logger.info(f"Image shape: {im.shape}\n")
 
     # Measure the bleaching of the fluorophore
 
     print('Start by measuring fluorophore bleaching')
 
-    _,ax = plt.subplots(1,3,figsize=(20,5))
+    fig,ax = plt.subplots(1,3,figsize=(20,5))
     ax[0].imshow(im[0,...],cmap='viridis')
     ax[1].imshow(im[FRAP_frame,...],cmap='viridis')
     ax[2].imshow(im[-1,...],cmap='viridis')
@@ -117,63 +118,85 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     for a in ax:
         a.axis('off')
 
-    plt.tight_layout()
-    
-    coords_fluo_bleach = plt.ginput(1)[0]
+    fig.tight_layout()
 
     if plt.waitforbuttonpress():
         plt.close()
-    
-    logger.info(f"Coordinates of fluorophore bleaching: {coords_fluo_bleach}")
+    number = questionary.path('How many cells do you want to analyze?').ask()
 
-    center = [int(x) for x in list(coords_fluo_bleach)]
-    
+    coords_fluo_bleach_total = plt.ginput(int(number))
+
+    intensity_bleach = np.zeros((int(number),np.shape(im)[0]))
+    labels = compute_lab(im)
     size = size_of_bbox_zoom  # Replace with the actual size
 
-    zoomed_im = zoomed_image(im, center, size)
+    for index,coords_fluo_bleach in enumerate(coords_fluo_bleach_total):
 
-    labels = compute_lab(zoomed_im)
+        logger.info(f"Coordinates of fluorophore bleaching {index}: {coords_fluo_bleach}\n")
 
-    int_im = zoomed_im*(labels==1.)
+        center = [int(x) for x in list(coords_fluo_bleach)]
 
-    intensity_bleach = []
-    for frame in tqdm(range(np.shape(zoomed_im)[0])):
-        intensity_bleach.append(np.mean(int_im[frame,...][int_im[frame,...]>0])) #compute the mean intensity of the masked image without the background (0)
+        labs = overlap(labels,center)
 
-    logger.info(f'unfrapped cell intensity: {intensity_bleach}')
+        labels_final = labels.copy()
 
+        for ind,l in enumerate(labs):
+            labels_final[ind+1,...] = np.where(labels_final[ind+1,...] == l,1,0)
+
+        label_number = labels_final[0,...][int(center[1]), int(center[0])]
+        labels_final[0,...] = np.where(labels_final[0,...] == label_number,1,0)
+
+        int_im = im*(labels_final==1.)
+        #tiff.imwrite(save_path.split('/')[-1]+'_int_im.tif',int_im)
+        
+        #np.save(save_path.split('/')[-1]+'_int_im.npy',int_im)
+
+        for frame in tqdm(range(np.shape(int_im)[0])):
+            intensity_bleach[index][frame] = np.mean(int_im[frame,...][int_im[frame,...]>0]) #compute the mean intensity of the masked image without the background (0)
+
+    logger.info(f'mean unfrapped cell intensity: {intensity_bleach}\n')
+    np.save(save_path.split('/')[-1]+'_intensity_bleach.npy',intensity_bleach)
     # start analyzing the FRAPed cells
 
     number = questionary.path('How many cells (ROIs) do you want to analyze?').ask()
 
-    logger.info(f"Number of cells processed: {number}")
+    logger.info(f"Number of cells processed: {number}\n")
 
-    _,ax = plt.subplots(1,2,figsize=(15,5))
+    fig,ax = plt.subplots(1,2,figsize=(15,5))
     ax[0].imshow(im[0,...],cmap='viridis')
     ax[1].imshow(im[FRAP_frame,...],cmap='viridis')
     ax[0].set_title('pre-FRAP image')
     ax[1].set_title('FRAP image')
+
+    for a in ax:
+        a.axis('off')
+    
+    fig.tight_layout()
 
     coords = plt.ginput(int(number))
 
     if plt.waitforbuttonpress():
         plt.close()
 
-    logger.info(f"Coordinates of cells analyzed: {coords}")
+    logger.info(f"Coordinates of cells analyzed: {coords}\n")
     print('You entered %s' % coords)
 
     ifrap = []
     df_list_raw = []
     df_list_interp = []
+
+    _,ax = plt.subplots(1,2,figsize=(15,5))
     for index,coord in enumerate(coords):
 
         c = [int(x) for x in list(coord)]
         center = c 
         size = size_of_bbox_zoom 
 
-        zoomed_im = zoomed_image(im, center, size)
+        zoomed_im = zoomed_image(logger,im, center, size)
 
         im_r = zoomed_im
+
+        logger.info(f"The shape of the image analyzed centered at {c} is {im_r.shape}\n")
 
         mean_list_bleached = []
         mean_list_unbleached = []
@@ -189,13 +212,16 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         print('Click on the center of the unbleached spot then on the bleached spot finally on the background of the crop')
         print('Press any key to end the selection')
 
-        logger.info(f'The image was actualized every {frame_actualization} frames')
+        logger.info(f'The image was actualized every {frame_actualization} frames\n')
+
         for i in range(0,im_r.shape[0]):
             if counter % frame_actualization == 0 or i in frame_pre_bleach:
                 counter += 1
-                _,ax = plt.subplots(1,2,figsize=(15,5))
                 # Display the image
                 ax[0].imshow(im_r[i,...], cmap='viridis')
+                if i == 0:
+                    ax[0].scatter(center[1],center[0],c='black',s=40)
+                
                 ax[0].set_title(f'Frame {i}')
                 ax[1].imshow(im_r[FRAP_frame,...], cmap='viridis')
                 ax[1].set_title(f'Frame {FRAP_frame}')
@@ -237,8 +263,10 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
                 pixels_in_bleached = im_r[i,...][mask_bleached]
                 pixels_in_background = im_r[i,...][mask_background]
 
-                ax[1].imshow(mask_unbleached, cmap='viridis',interpolation=None)
-                ax[1].imshow(mask_bleached, cmap='viridis',alpha=0.5,interpolation=None)
+                vmin = np.min(im_r[FRAP_frame,...])
+                vmax = np.max(im_r[FRAP_frame,...])
+                ax[1].imshow(mask_unbleached, cmap='viridis',interpolation=None,vmin=vmin,vmax=vmax)
+                ax[1].imshow(mask_bleached, cmap='viridis',alpha=0.5,interpolation=None,vmin=vmin,vmax=vmax)
                 ax[1].set_title(f'Mean intensity in this patch {np.mean(pixels_in_unbleached):.2f}, \n bleach {np.mean(pixels_in_bleached):.2f} \n background {np.mean(pixels_in_background):.2f}')
 
                 mean_list_unbleached.append(np.mean(pixels_in_unbleached))
@@ -249,7 +277,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
                 for i in ax:
                     i.axis('off')
 
-
+                plt.tight_layout()
             else:
                 counter += 1
                 continue
@@ -257,8 +285,8 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         if plt.waitforbuttonpress():
             plt.close()
 
-        logger.info(f"Mean intensity of unbleached spot: {mean_list_unbleached}")
-        logger.info(f"Mean intensity of bleached spot: {mean_list_bleached}")
+        logger.info(f"Mean intensity of unbleached spot: {mean_list_unbleached}\n")
+        logger.info(f"Mean intensity of bleached spot: {mean_list_bleached}\n")
 
         # Original x values
         x_values = np.array(interpolation_values)
@@ -276,7 +304,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         interpolated_values_bleached = f_bleach(x_new)
         interpolated_values_background = f_background(x_new)
 
-        iFRAP = (interpolated_values_unbleached-interpolated_values_bleached)/(intensity_bleach - interpolated_values_background) #compute the iFRAP curve as defined by Gabriele et al. science 2022
+        iFRAP = (interpolated_values_unbleached-interpolated_values_bleached)/(np.mean(intensity_bleach,axis=0) - interpolated_values_background) #compute the iFRAP curve as defined by Gabriele et al. science 2022
 
         ifrap.append(iFRAP)
 
@@ -284,7 +312,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
                           index=['mean_list_background','mean_list_bleached','mean_list_unbleached'])
         df = df.T
         df['nucleus'] = [index]*len(df)
-        df['unfrap_cell'] = intensity_bleach[frames]
+        df['unfrap_cell'] = [np.mean(intensity_bleach,axis=0)[fra] for fra in frames]
 
         df_list_raw.append(df)
 
@@ -293,7 +321,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         
         df = df.T
         df['nucleus'] = [index]*len(df)
-        df['unfrap_cell'] = intensity_bleach
+        df['unfrap_cell'] = np.mean(intensity_bleach,axis=0)
         df_list_interp.append(df)
 
     np.save(save_path.split('/')[-1]+'.npy',ifrap)
@@ -304,7 +332,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     df_list_raw.to_csv(save_path.split('/')[-1]+'_raw.csv')
     df_list_interp.to_csv(save_path.split('/')[-1]+'_interp.csv')
 
-    logger.info(f"Created the output file {save_path.split('/')[-1]}.npy")
+    logger.info(f"Created the output file {save_path.split('/')[-1]}.npy\n")
     logger.info("Done!")
 
 path = os.getcwd()
