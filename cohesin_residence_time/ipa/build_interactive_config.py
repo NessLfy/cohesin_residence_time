@@ -36,18 +36,22 @@ def main() -> None:
     
     size_of_bbox_zoom = questionary.path("Size of bbox zoom:").ask()
     if size_of_bbox_zoom == "": size_of_bbox_zoom = 100
+    else: size_of_bbox_zoom = int(size_of_bbox_zoom)
 
     frame_actualization = questionary.path("Frame actualization:").ask()
     if frame_actualization == "": frame_actualization = 25
+    else : frame_actualization = int(frame_actualization)
 
     frame_pre_bleach = questionary.path("Frame pre bleach:").ask()
     if frame_pre_bleach == "": frame_pre_bleach = [0,1,2,3,5,249]
 
     radius_unbleach_spot = questionary.path("Radius unbleach spot:").ask()
     if radius_unbleach_spot == "": radius_unbleach_spot = 5
+    else: radius_unbleach_spot = int(radius_unbleach_spot)
 
     radius_bleach_spot = questionary.path("Radius bleach spot:").ask()
     if radius_bleach_spot == "": radius_bleach_spot = 7
+    else: radius_bleach_spot = int(radius_bleach_spot)
 
     interpolation_values = questionary.path("Interpolation values:").ask()
     if interpolation_values == "": interpolation_values =  [0,1,2,3,5, 24, 49, 74, 99, 124, 149, 174, 199, 224, 249]
