@@ -1,5 +1,5 @@
 FRAP_frame: 4
-frame_actualization: 25
+frame_actualization: 10
 frame_pre_bleach:
 - 0
 - 1
@@ -14,16 +14,32 @@ interpolation_values:
 - 2
 - 3
 - 5
+- 14
 - 24
-- 49
+- 34
+- 44
+- 54
+- 64
 - 74
-- 99
+- 84
+- 94
+- 104
+- 114
 - 124
-- 149
+- 134
+- 144
+- 154
+- 164
 - 174
-- 199
+- 184
+- 194
+- 204
+- 214
 - 224
+- 234
+- 244
 - 249
+
 name_of_experiment: 20240116_NIPBL_FKBP_nodtag
 radius_bleach_spot: 7
 radius_unbleach_spot: 5
