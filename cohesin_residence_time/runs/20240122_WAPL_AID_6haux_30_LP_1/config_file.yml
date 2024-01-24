@@ -1,0 +1,31 @@
+FRAP_frame: 4
+frame_actualization: 25
+frame_pre_bleach:
+- 0
+- 1
+- 2
+- 3
+- 5
+- 249
+im_path: /Volumes/tungsten/scratch/ggiorget/nessim/microscopy_data/FRAP_Rad21_halo/20240122_FRAP_WAPL_AID_aux/20240122_FRAP_WAPL_AID_6haux_Rad21_Halo_561_30_LP_1_conf561Triple-LP-FRAP.ome.tf2
+interpolation_values:
+- 0
+- 1
+- 2
+- 3
+- 5
+- 24
+- 49
+- 74
+- 99
+- 124
+- 149
+- 174
+- 199
+- 224
+- 249
+name_of_experiment: 20240122_WAPL_AID_6haux_30_LP_1
+radius_bleach_spot: 7
+radius_unbleach_spot: 5
+save_path: /Users/louaness/Documents/cohesin_residence_time/cohesin_residence_time/runs/20240122_WAPL_AID_6haux_30_LP_1
+size_of_bbox_zoom: 100
