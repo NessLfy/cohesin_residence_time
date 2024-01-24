@@ -217,13 +217,13 @@ scratchpad/test_interactive.py
 
 /runs/example/ifrap_testing.npy
 
-cohesin_residence_time/runs/*/*.npy
-cohesin_residence_time/runs/*/*.csv
+/runs/*/*.npy
+/runs/*/*.csv
 
 .DS_Store
 
-cohesin_residence_time/runs/20240116_NIPBL_FKBP_nodtag_30_LP_1/20240116_NIPBL_FKBP_nodtag_30_LP_1_int_im.tif
-cohesin_residence_time/runs/20240116_NIPBL_FKBP_nodtag_40_LP/20240116_NIPBL_FKBP_nodtag_int_im.tif
-cohesin_residence_time/scratchpad/test_yaml.yml
-cohesin_residence_time/scratchpad/test_analysis_FRAP.ipynb
-cohesin_residence_time/scratchpad/analyze_data.ipynb
+/runs/20240116_NIPBL_FKBP_nodtag_30_LP_1/20240116_NIPBL_FKBP_nodtag_30_LP_1_int_im.tif
+/runs/20240116_NIPBL_FKBP_nodtag_40_LP/20240116_NIPBL_FKBP_nodtag_int_im.tif
+/scratchpad/test_yaml.yml
+/scratchpad/test_analysis_FRAP.ipynb
+/scratchpad/analyze_data.ipynb
