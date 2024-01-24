@@ -155,7 +155,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
             intensity_bleach[index][frame] = np.mean(int_im[frame,...][int_im[frame,...]>0]) #compute the mean intensity of the masked image without the background (0)
 
     logger.info(f'mean unfrapped cell intensity: {intensity_bleach}\n')
-    np.save(save_path.split('/')[-1]+'_intensity_bleach.npy',intensity_bleach)
+    #np.save(save_path.split('/')[-1]+'_intensity_bleach.npy',intensity_bleach)
     # start analyzing the FRAPed cells
 
     number = questionary.path('How many cells (ROIs) do you want to analyze?').ask()
@@ -185,7 +185,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     df_list_raw = []
     df_list_interp = []
 
-    _,ax = plt.subplots(1,2,figsize=(15,5))
+    _,ax = plt.subplots(1,3,figsize=(15,5))
     for index,coord in enumerate(coords):
 
         c = [int(x) for x in list(coord)]
@@ -218,12 +218,9 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
             if counter % frame_actualization == 0 or i in frame_pre_bleach:
                 counter += 1
                 # Display the image
-                ax[0].imshow(im_r[i,...], cmap='viridis')
-                if i == 0:
-                    ax[0].scatter(center[1],center[0],c='black',s=40)
-                
+                ax[0].imshow(im_r[i,...], cmap='viridis')                
                 ax[0].set_title(f'Frame {i}')
-                ax[1].imshow(im_r[FRAP_frame,...], cmap='viridis')
+                ax[1].imshow(im_r[FRAP_frame,...], cmap='viridis',zorder=0)
                 ax[1].set_title(f'Frame {FRAP_frame}')
 
                 radius = radius_unbleach_spot
@@ -263,11 +260,13 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
                 pixels_in_bleached = im_r[i,...][mask_bleached]
                 pixels_in_background = im_r[i,...][mask_background]
 
-                vmin = np.min(im_r[FRAP_frame,...])
+                #vmin = np.min(im_r[FRAP_frame,...])
                 vmax = np.max(im_r[FRAP_frame,...])
-                ax[1].imshow(mask_unbleached, cmap='viridis',interpolation=None,vmin=vmin,vmax=vmax)
-                ax[1].imshow(mask_bleached, cmap='viridis',alpha=0.5,interpolation=None,vmin=vmin,vmax=vmax)
-                ax[1].set_title(f'Mean intensity in this patch {np.mean(pixels_in_unbleached):.2f}, \n bleach {np.mean(pixels_in_bleached):.2f} \n background {np.mean(pixels_in_background):.2f}')
+                np.where(mask_bleached==True,vmax,0)
+                np.where(mask_unbleached==True,vmax,0)
+                ax[2].imshow(mask_unbleached, cmap='viridis',interpolation=None)
+                ax[2].imshow(mask_bleached, cmap='viridis',alpha=0.9,interpolation=None)
+                ax[2].set_title(f'Mean intensity in this patch {np.mean(pixels_in_unbleached):.2f}, \n bleach {np.mean(pixels_in_bleached):.2f} \n background {np.mean(pixels_in_background):.2f}')
 
                 mean_list_unbleached.append(np.mean(pixels_in_unbleached))
                 mean_list_bleached.append(np.mean(pixels_in_bleached))
