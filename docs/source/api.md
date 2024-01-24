@@ -1,25 +1,21 @@
 # API
 
-## s01_preprocessing
+## utils
 ```{eval-rst}
-.. automodule:: ipa.s01_preprocessing.build_preprocessing_config
-    :members:
-.. automodule:: ipa.s01_preprocessing.run_preprocessing
+.. automodule:: ipa.utils.interactive_utils
     :members:
 ```
 
-## s02_segmentation
+## Build config file
+
 ```{eval-rst}
-.. automodule:: ipa.s02_segmentation.build_segmentation_config
-    :members:
-.. automodule:: ipa.s02_segmentation.run_segmentation
+.. automodule:: ipa.build_interactive_config
     :members:
 ```
 
-## s03_feature_extraction
+## Run analysis
+
 ```{eval-rst}
-.. automodule:: ipa.s03_feature_extraction.build_feature_extraction_config
-    :members:
-.. automodule:: ipa.s03_feature_extraction.run_feature_extraction
+.. automodule:: ipa.run_analysis
     :members:
 ```

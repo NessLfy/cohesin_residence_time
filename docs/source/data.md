@@ -1,36 +1,21 @@
 # Data
-Add a description of the data used in this project.
+Description of the data used in this project.
+
+## Data acquisition
+
+The data in this project come from spinning-disk confocal microscopy. The data was acquired with 
+
+## Data structure
+
+The raw data is structured as a .ome.tf2 file with axis (z,y,x). The actual shape of the image analyzed can be found in the .log file of each run.
+
+## Sample preparation
+
+The images represent Rad21-Halo labeled with JF-549.
+
+## Image analysis
+
+For the complete analysis steps see the processing_steps page.
 
 
-## Bullet List
-- Bullet lists in Markdown are pretty straightforward.
-- A bunch of bullet points.
-  - Nested bullets should be indented by two or more spaces.
-  - They can just "show up" inline with the rest of the list. Adding blank lines
-    before and after is also permitted.
-- It is also possible to have multiple paragraphs in a bullet.
 
-  Make sure to have a blank line between the paragraphs, and to indent the
-  paragraphs to the correct level.
-
-
-## Numbered Lists
-1. Numbered lists are not complicated.
-2. They do exactly what you think they do.
-
-
-## Tables
-| Header  | Another header |
-|---------|----------------|
-| field 1 | something      |
-| field 2 | something else |
-
-
-## Tabs
-```{tab} First
-Something about the first tab.
-```
-
-```{tab} Second
-Something about the second tab.
-```
