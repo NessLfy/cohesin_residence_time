@@ -4,8 +4,15 @@ from tqdm import tqdm
 from scipy import ndimage
 from skimage.filters import threshold_otsu
 from sklearn.metrics import confusion_matrix
+import logging
 
-def zoomed_image(logger,im, center, size):
+def zoomed_image(logger:logging.Logger,im:np.array, center:tuple, size:int) -> np.array:
+    """
+    This function takes in an image array and returns a zoomed image array.
+    The zoomed image is a square of size 'size' centered at 'center'.
+    If the zoomed image is out of bounds, the function returns the original image.
+    """
+
     # Calculate the top left and bottom right coordinates of the square
     top_left = (center[1] - size // 2, center[0] - size // 2)
     bottom_right = (center[1] + size // 2, center[0] + size // 2)
@@ -32,7 +39,13 @@ def zoomed_image(logger,im, center, size):
     return zoomed_im
 
 
-def compute_lab (im_roi):
+def compute_lab (im_roi:np.array) -> np.array:
+    """
+    This function takes in an image array and returns a labelled image array.
+    The labelled image is obtained by thresholding the image using Otsu's method.
+    The labelled image is then eroded and filled to remove noise and avoid computing the intensity of neighboring cells.
+    """
+
     labels_final = np.zeros_like(im_roi)
 
     for frame in tqdm(range(im_roi.shape[0])):
@@ -44,7 +57,13 @@ def compute_lab (im_roi):
     return labels_final
 
 
-def overlap(im_lab,center):
+def overlap(im_lab:np.array,center:tuple) -> list:
+    """
+    This function takes in a labelled image array and the coordinate of the center of the cell to consider and returns a list of images containing only one label correspong to the tracked-cell.
+    The list of labels is obtained by computing the overlap between the labelled image and its subsequent frames.
+    The label with the highest overlap (IoU) is chosen as the label for the subsequent frame.
+    """
+
     labs = []
     for frame in tqdm(range(im_lab.shape[0]-1)):
         if frame == 0:
@@ -89,5 +108,4 @@ def overlap(im_lab,center):
         matched_label = list(ious.keys())[np.argmax(list(ious.values()))]
 
         labs.append(matched_label[1])
-        #match_lab = np.where(im_lab[frame+1,...] == matched_label[1],1,0)
     return labs
