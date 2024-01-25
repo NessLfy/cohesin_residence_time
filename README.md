@@ -12,6 +12,8 @@ duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est
 Lorem ipsum dolor sit amet.
 <!-- end abstract -->
 
+![example branch parameter](https://github.com/github/docs/actions/workflows/main.yml/badge.svg?branch=feature-1?branch=gh-pages)
+
 ## Repository Overview
 * `docs`: Contains all project documentation.
 * `infrastructure`: Contains detailed installation instructions for all requried tools.
