@@ -57,7 +57,7 @@ def main() -> None:
     if interpolation_values == "": interpolation_values =  [0,1,2,3,5, 24, 49, 74, 99, 124, 149, 174, 199, 224, 249]
 
     save_path = questionary.path("Save path:").ask()
-    if save_path == "": save_path = '/Users/louaness/Documents/cohesin_residence_time/cohesin_residence_time/runs/'
+    if save_path == "": save_path = '/Users/louaness/Documents/cohesin_residence_time/runs/'
     
     confi = os.path.join(save_path,name_of_experiment ,CONFIG_NAME)
 
