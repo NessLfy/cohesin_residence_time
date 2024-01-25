@@ -14,10 +14,10 @@ Make sure that you are in the root-directory of your project.
 ```
 
 With the following command a new envrionment is created with the name `cohesin_residence_time`.
-The packages which are installed are defined in the file `infrastructure/env-yamls/cohesin_residence_time-env.yaml`.
+The packages which are installed are defined in the file `infrastructure/env-yamls/cohesin_residence_time-env.yml`.
 
 ```bash
-mamba env create -f infrastructure/env-yamls/cohesin_residence_time-env.yaml
+mamba env create -f infrastructure/env-yamls/cohesin_residence_time-env.yml
 ```
 
 ### Activate environment
