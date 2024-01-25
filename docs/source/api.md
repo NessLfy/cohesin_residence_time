@@ -2,7 +2,7 @@
 
 ## utils
 ```{eval-rst}
-.. automodule:: ipa.utils.interactive_utils
+.. automodule:: ipa.utils.interactive_analysis_utils
     :members:
 ```
 
