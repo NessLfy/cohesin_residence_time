@@ -1,14 +1,4 @@
-"""
-run_preprocessing.py
-====================
-
-This script expects preprocessing_config.yaml to be present in the current
-working directory.
-"""
-
 import yaml
-from datetime import datetime
-import logging
 import numpy as np
 import tifffile as tiff
 from tqdm import tqdm
@@ -17,31 +7,10 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from scipy.interpolate import interp1d
-from utils.interactive_analysis_utils import zoomed_image, compute_lab, overlap
+from utils.interactive_analysis_utils import zoomed_image, compute_lab, overlap, _create_logger
 import questionary
 import os
 import pandas as pd
-
-def _create_logger(name: str) -> logging.Logger:
-    """
-    Create logger which logs to <timestamp>-<name>.log inside the current
-    working directory.
-
-    Parameters
-    ----------
-    name
-        Name of the logger instance.
-    """
-    logger = logging.Logger(name.capitalize())
-    now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    handler = logging.FileHandler(f"{now}-{name}.log")
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    return logger
 
 
 def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
@@ -64,6 +33,9 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     save_path, str: path to save the results
     name_of_experiment, str: name of the experiment
     """
+
+    ## Setting up the logger
+
     logger = _create_logger(name="interactive analysis")
 
     logger.info(f"Processing: {im_path} \n")
@@ -122,13 +94,15 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
 
     if plt.waitforbuttonpress():
         plt.close()
+
+    ## Measure the bleaching of the fluorophore
     number = questionary.path('How many cells do you want to analyze?').ask()
 
     coords_fluo_bleach_total = plt.ginput(int(number))
 
     intensity_bleach = np.zeros((int(number),np.shape(im)[0]))
-    labels = compute_lab(im)
-    size = size_of_bbox_zoom  # Replace with the actual size
+    labels = compute_lab(im) # perform the otsu segmentation on the image
+    size = size_of_bbox_zoom 
 
     for index,coords_fluo_bleach in enumerate(coords_fluo_bleach_total):
 
@@ -136,28 +110,36 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
 
         center = [int(x) for x in list(coords_fluo_bleach)]
 
-        labs = overlap(labels,center)
+        labs = overlap(labels,center) # track the selected cell in the image and return the label of the cell
 
         labels_final = labels.copy()
 
         for ind,l in enumerate(labs):
-            labels_final[ind+1,...] = np.where(labels_final[ind+1,...] == l,1,0)
+            labels_final[ind+1,...] = np.where(labels_final[ind+1,...] == l,1,0) # create a mask of the selected cell in the image
 
         label_number = labels_final[0,...][int(center[1]), int(center[0])]
-        labels_final[0,...] = np.where(labels_final[0,...] == label_number,1,0)
+        labels_final[0,...] = np.where(labels_final[0,...] == label_number,1,0) # add the first frame
 
-        int_im = im*(labels_final==1.)
+        int_im = im*(labels_final==1.) # mask the intensity image with the selected cell
+
+        ## DEBUG
+
         #tiff.imwrite(save_path.split('/')[-1]+'_int_im.tif',int_im)
         
         #np.save(save_path.split('/')[-1]+'_int_im.npy',int_im)
+
+        ## END DEBUG
 
         for frame in tqdm(range(np.shape(int_im)[0])):
             intensity_bleach[index][frame] = np.mean(int_im[frame,...][int_im[frame,...]>0]) #compute the mean intensity of the masked image without the background (0)
 
     logger.info(f'mean unfrapped cell intensity: {intensity_bleach}\n')
-    #np.save(save_path.split('/')[-1]+'_intensity_bleach.npy',intensity_bleach)
-    # start analyzing the FRAPed cells
 
+    ## DEBUG
+    #np.save(save_path.split('/')[-1]+'_intensity_bleach.npy',intensity_bleach)
+    ## END DEBUG
+
+    # start analyzing the FRAPed cells
     number = questionary.path('How many cells (ROIs) do you want to analyze?').ask()
 
     logger.info(f"Number of cells processed: {number}\n")
@@ -181,18 +163,21 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     logger.info(f"Coordinates of cells analyzed: {coords}\n")
     print('You entered %s' % coords)
 
+    # lists that will contain the iFRAP curves, the raw data and the interpolated data
     ifrap = []
     df_list_raw = []
     df_list_interp = []
 
     _,ax = plt.subplots(1,3,figsize=(15,5))
+    # loop over the selected cells
     for index,coord in enumerate(coords):
 
         c = [int(x) for x in list(coord)]
         center = c 
         size = size_of_bbox_zoom 
 
-        zoomed_im = zoomed_image(logger,im, center, size)
+        zoomed_im = zoomed_image(logger,im, center, size) 
+        # crop the image around the selected cell
 
         im_r = zoomed_im
 
@@ -214,36 +199,55 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
 
         logger.info(f'The image was actualized every {frame_actualization} frames\n')
 
+        ## add the circles to the image (in the first frame to be able to actualie them after every frame)
+        c_plot = patches.Circle((0, 0), 0, edgecolor='red', facecolor='none')
+        c_plot_b = patches.Circle((0, 0), 0, edgecolor='blue', facecolor='none')
+        c_plot_bck = patches.Circle((0, 0), 0, edgecolor='green', facecolor='none')
+
+        c_plot_2 = patches.Circle((0, 0), 0, edgecolor='red', facecolor='none')
+        c_plot_b_2 = patches.Circle((0, 0), 0, edgecolor='blue', facecolor='none')
+        c_plot_bck_2 = patches.Circle((0, 0), 0, edgecolor='green', facecolor='none')
+
+        ax[1].add_patch(c_plot)
+        ax[1].add_patch(c_plot_b)
+        ax[1].add_patch(c_plot_bck)
+        ax[2].add_patch(c_plot_2)
+        ax[2].add_patch(c_plot_b_2)
+        ax[2].add_patch(c_plot_bck_2)
+
+        previous_frame = 0 # initialize the previous frame to 0 to be able to plot both the actual and previous frame
+
         for i in range(0,im_r.shape[0]):
             if counter % frame_actualization == 0 or i in frame_pre_bleach:
                 counter += 1
                 # Display the image
                 ax[0].imshow(im_r[i,...], cmap='viridis')                
                 ax[0].set_title(f'Frame {i}')
-                ax[1].imshow(im_r[FRAP_frame,...], cmap='viridis',zorder=0)
-                ax[1].set_title(f'Frame {FRAP_frame}')
 
+                # before the FRAP frame, display the frame after frap to be able to see where the unbleached spot is
+
+                if i <= FRAP_frame:
+                    ax[1].imshow(im_r[FRAP_frame,...], cmap='viridis',zorder=0)
+                    ax[1].set_title(f'Frame {FRAP_frame} with detections at frame {previous_frame}')
+                else:
+                    ax[1].imshow(im_r[i,...], cmap='viridis',zorder=0)
+                    ax[1].set_title(f'Frame {i} with detections at frame {previous_frame}')
+
+                if i > 0:
+                    ax[2].imshow(im_r[previous_frame,...], cmap='viridis',zorder=0)
+                    ax[2].set_title(f'Frame {previous_frame} with detections at frame {previous_frame}')
+                else:
+                    ax[2].imshow(im_r[i,...], cmap='viridis',zorder=0)
+                    ax[2].set_title(f'Frame {i}')
+                
+                previous_frame = i
                 radius = radius_unbleach_spot
                 radius_b = radius_bleach_spot
                 # Create a circle patch
-                a = plt.ginput(3) #click on the center of the unbleached spot, then on the bleached spot then on the background of the crop
+                a = plt.ginput(3) # select the unbleached spot, the bleached spot and the background
                 x,y = a[0]
                 x_b,y_b = a[1]
                 x_bck,y_bck = a[2]
-
-                circle = patches.Circle((x, y), radius, edgecolor='r', facecolor='none')
-                circle_b = patches.Circle((x_b, y_b), radius, edgecolor='green', facecolor='none')
-                circle_bck = patches.Circle((x_bck, y_bck), radius, edgecolor='blue', facecolor='none')
-                # Get the current axes, and add the circle to them
-                a = plt.gca()
-
-                circle_stored = a.add_patch(circle)
-                circle_stored_b = a.add_patch(circle_b)
-                circle_stored_bck = a.add_patch(circle_bck)
-
-                circle_stored.remove()
-                circle_stored_b.remove()
-                circle_stored_bck.remove()
                 
                 # Create an array of indices
                 y_indices, x_indices = np.ogrid[:height, :width]
@@ -260,14 +264,22 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
                 pixels_in_bleached = im_r[i,...][mask_bleached]
                 pixels_in_background = im_r[i,...][mask_background]
 
-                #vmin = np.min(im_r[FRAP_frame,...])
-                vmax = np.max(im_r[FRAP_frame,...])
-                np.where(mask_bleached==True,vmax,0)
-                np.where(mask_unbleached==True,vmax,0)
-                ax[2].imshow(mask_unbleached, cmap='viridis',interpolation=None)
-                ax[2].imshow(mask_bleached, cmap='viridis',alpha=0.9,interpolation=None)
-                ax[2].set_title(f'Mean intensity in this patch {np.mean(pixels_in_unbleached):.2f}, \n bleach {np.mean(pixels_in_bleached):.2f} \n background {np.mean(pixels_in_background):.2f}')
+                # Actualize the coordinate of the circles to be able to plot them in the next frame
+                c_plot.center = x, y
+                c_plot.radius = radius
+                c_plot_b.center = x_b, y_b
+                c_plot_b.radius = radius_b
+                c_plot_bck.center = x_bck, y_bck
+                c_plot_bck.radius = radius_b
 
+                c_plot_2.center = x, y
+                c_plot_2.radius = radius
+                c_plot_b_2.center = x_b, y_b
+                c_plot_b_2.radius = radius_b
+                c_plot_bck_2.center = x_bck, y_bck
+                c_plot_bck_2.radius = radius_b
+
+                # compute the mean intensity of the pixels inside the circles
                 mean_list_unbleached.append(np.mean(pixels_in_unbleached))
                 mean_list_bleached.append(np.mean(pixels_in_bleached))
                 mean_list_background.append(np.mean(pixels_in_background))
@@ -280,7 +292,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
             else:
                 counter += 1
                 continue
-
+            
         if plt.waitforbuttonpress():
             plt.close()
 
@@ -303,9 +315,12 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         interpolated_values_bleached = f_bleach(x_new)
         interpolated_values_background = f_background(x_new)
 
+        # Compute the iFRAP curve
         iFRAP = (interpolated_values_unbleached-interpolated_values_bleached)/(np.mean(intensity_bleach,axis=0) - interpolated_values_background) #compute the iFRAP curve as defined by Gabriele et al. science 2022
 
         ifrap.append(iFRAP)
+
+        # put all the data in a dataframe
 
         df = pd.DataFrame([mean_list_background,mean_list_bleached,mean_list_unbleached],
                           index=['mean_list_background','mean_list_bleached','mean_list_unbleached'])
@@ -323,6 +338,15 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         df['unfrap_cell'] = np.mean(intensity_bleach,axis=0)
         df_list_interp.append(df)
 
+        # remove the circles between each analyzed cells
+
+        c_plot.remove()
+        c_plot_b.remove()
+        c_plot_2.remove()
+        c_plot_b_2.remove()
+
+    
+    # save the data
     np.save(save_path.split('/')[-1]+'.npy',ifrap)
     df_list_raw = pd.concat(df_list_raw)
     df_list_interp = pd.concat(df_list_interp)
@@ -334,6 +358,9 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     logger.info(f"Created the output file {save_path.split('/')[-1]}.npy\n")
     logger.info("Done!")
 
+
+# Execute the file
+    
 path = os.getcwd()
 
 if __name__ == "__main__":
