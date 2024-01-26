@@ -5,6 +5,8 @@ from scipy import ndimage
 from skimage.filters import threshold_otsu
 from sklearn.metrics import confusion_matrix
 import logging
+from datetime import datetime
+import logging
 
 def zoomed_image(logger:logging.Logger,im:np.array, center:tuple, size:int) -> np.array:
     """
@@ -109,3 +111,25 @@ def overlap(im_lab:np.array,center:tuple) -> list:
 
         labs.append(matched_label[1])
     return labs
+
+def _create_logger(name: str) -> logging.Logger:
+    """
+    Create logger which logs to <timestamp>-<name>.log inside the current
+    working directory.
+
+    Parameters
+    ----------
+    name
+        Name of the logger instance.
+    """
+    logger = logging.Logger(name.capitalize())
+    now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    handler = logging.FileHandler(f"{now}-{name}.log")
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
+
