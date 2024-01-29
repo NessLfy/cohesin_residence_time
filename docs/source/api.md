@@ -1,6 +1,6 @@
 # API
 
-## utils
+## Utils
 ```{eval-rst}
 .. automodule:: ipa.utils.interactive_analysis_utils
     :members:
