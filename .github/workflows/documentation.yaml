@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-python@v3
       - name: Install dependencies
         run: |
-          $CONDA/bin/conda env update --file ../../infrastructure/env-yamls/cohesin_residence_time-env.yml --name base 
+          pip install sphinx furo myst-parser sphinx-inline-tabs sphinx-copybutton numpy tqdm scipy scikit-image matplotlib tifffile questionary os pandas
       - name: Sphinx build
         run: |
           sphinx-build docs/source docs/_build

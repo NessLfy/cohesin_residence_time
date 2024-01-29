@@ -6,7 +6,6 @@ from skimage.filters import threshold_otsu
 from sklearn.metrics import confusion_matrix
 import logging
 from datetime import datetime
-import logging
 
 def zoomed_image(logger:logging.Logger,im:np.array, center:tuple, size:int) -> np.array:
     """
