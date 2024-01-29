@@ -2,7 +2,19 @@
 
 ## Utils
 ```{eval-rst}
-.. automodule:: ipa.utils.interactive_analysis_utils
+.. automodule:: ipa.utils.interactive_analysis_utils.zoomed_image
+    :members:
+```
+```{eval-rst}
+.. automodule:: ipa.utils.interactive_analysis_utils.compute_lab
+    :members:
+```
+```{eval-rst}
+.. automodule:: ipa.utils.interactive_analysis_utils.overlap
+    :members:
+```
+```{eval-rst}
+.. automodule:: ipa.utils.interactive_analysis_utils._create_logger
     :members:
 ```
 
