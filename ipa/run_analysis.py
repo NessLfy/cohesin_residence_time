@@ -7,7 +7,9 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from scipy.interpolate import interp1d
-from utils.interactive_analysis_utils import zoomed_image, compute_lab, overlap, _create_logger
+import sys
+sys.path.append('utils/')
+from interactive_analysis_utils import zoomed_image, compute_lab, overlap, _create_logger
 import questionary
 import os
 import pandas as pd
