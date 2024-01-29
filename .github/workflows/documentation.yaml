@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-python@v3
       - name: Install dependencies
         run: |
-          conda create -f ../../infrastructure/env-yamls/cohesin_residence_time-env.yml
+          conda env create -f ../../infrastructure/env-yamls/cohesin_residence_time-env.yml
       - name: Sphinx build
         run: |
           sphinx-build docs/source docs/_build
