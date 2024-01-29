@@ -8,6 +8,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
+      - name: Set environment variables
+        run: |-
+          echo "CONDA_ENV_FILE=../../infrastructure/env-yamls/env_build_doc.yml" >> $GITHUB_ENV
+      - name: Install conda dependencies
+        run: |-
+          $CONDA/bin/conda env update -f $CONDA_ENV_FILE
       - name: Install dependencies
         run: |
           pip install sphinx furo myst-parser sphinx-inline-tabs sphinx-copybutton

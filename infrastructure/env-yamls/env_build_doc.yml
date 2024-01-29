@@ -1,0 +1,18 @@
+name: cohesin_residence_time
+channels:
+  - conda-forge
+dependencies:
+  - numpy
+  - scipy
+  - matplotlib
+  - pandas
+  - scikit-image
+  - tifffile
+  - questionary
+  - tqdm
+  - sphinx 
+  - furo
+  - myst-parser 
+  - sphinx-inline-tabs 
+  - sphinx-copybutton
+  - pyyaml
