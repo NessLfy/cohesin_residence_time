@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-python@v3
       - name: Install conda dependencies
         run: |-
-          $CONDA/bin/conda install -c conda-forge numpy scipy matplotlib pandas scikit-image tifffile questionary tqdm sphinx furo myst-parser sphinx-inline-tabs sphinx-copybutton pyyaml
+          $CONDA/bin/conda install -c conda-forge numpy scipy matplotlib pandas scikit-image tifffile questionary tqdm sphinx furo myst-parser sphinx-inline-tabs sphinx-copybutton pyyaml scikit-learn
       - name: Sphinx build
         run: |
           $CONDA/bin/sphinx-build docs/source docs/_build
