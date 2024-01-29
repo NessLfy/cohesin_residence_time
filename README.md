@@ -1,15 +1,9 @@
 <!-- start abstract -->
 # Cohesin_Residence_Time
-![](https://picsum.photos/id/223/800/600)
+![](docs/source/resources/logo_readme.jpg)
 
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
-tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At
-vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
-no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet,
-consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et
-dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo
-duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est
-Lorem ipsum dolor sit amet.
+This is a repository to analyse inversed fluorescence recovery after photobleaching (iFRAP) data in order to estimate the residence time of cohesin on DNA.
+
 <!-- end abstract -->
 
 ![example branch parameter](https://github.com/github/docs/actions/workflows/Documentation.yml/badge.svg?branch=feature-1?branch=gh-pages)
@@ -24,8 +18,12 @@ Lorem ipsum dolor sit amet.
 ## Setup
 Detailed install instructions can be found in [infrastructure/README.md](infrastructure/README.md).
 
-## Citation
-Do not forget to cite our [publication]() if you use any of our provided materials.
+## Example
+
+An example on how to use this repository can be found in the [examples](docs/source/example.md).
+
+<!-- ## Citation
+Do not forget to cite our [publication]() if you use any of our provided materials. -->
 
 ---
 This project was generated with the [faim-ipa-project](https://fmi-faim.github.io/ipa-project-template/) copier template.

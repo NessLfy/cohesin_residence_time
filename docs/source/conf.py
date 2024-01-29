@@ -44,7 +44,7 @@ myst_heading_anchors = 5
 html_theme = "furo"
 html_static_path = ["_static"]
 html_title = "Cohesin_Residence_Time"
-html_logo = "resources/logoipsum-258.svg"
+html_logo = "resources/logo_home.jpg"
 html_theme_options = {
     "light_css_variables": {
         "font-stack": "Source Sans Pro, sans-serif",
