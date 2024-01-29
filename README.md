@@ -4,10 +4,6 @@
 
 This is a repository to analyse inversed fluorescence recovery after photobleaching (iFRAP) data in order to estimate the residence time of cohesin on DNA.
 
-<!-- end abstract -->
-
-![example branch parameter](https://github.com/github/docs/actions/workflows/Documentation.yml/badge.svg?branch=feature-1?branch=gh-pages)
-
 ## Repository Overview
 * `docs`: Contains all project documentation.
 * `infrastructure`: Contains detailed installation instructions for all requried tools.
@@ -27,3 +23,6 @@ Do not forget to cite our [publication]() if you use any of our provided materia
 
 ---
 This project was generated with the [faim-ipa-project](https://fmi-faim.github.io/ipa-project-template/) copier template.
+
+
+<!-- end abstract -->
