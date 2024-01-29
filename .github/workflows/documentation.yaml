@@ -13,7 +13,7 @@ jobs:
           $CONDA/bin/conda install -c conda-forge numpy scipy matplotlib pandas scikit-image tifffile questionary tqdm sphinx furo myst-parser sphinx-inline-tabs sphinx-copybutton pyyaml
       - name: Sphinx build
         run: |
-          sphinx-build docs/source docs/_build
+          $CONDA/bin/sphinx-build docs/source docs/_build
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
