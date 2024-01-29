@@ -8,30 +8,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v3
-      - name: Set environment variables
-        run: |-
-          echo "CONDA_ENV_FILE=../../infrastructure/env-yamls/cohesin_residence_time-env.yml.yml" >> $GITHUB_ENV
-          echo "PYTHON_VERSION=${{ matrix.python-version }}" >> $GITHUB_ENV
-      - name: Cache conda
-        uses: actions/cache@v2
-        with:
-          path: ~/conda_pkgs_dir
-          key:
-            ${{ runner.os }}-conda-py${{ matrix.python-version }}-${{
-            hashFiles('ci/requirements/environment.yml') }}
-      - name: Setup conda
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          channels: conda-forge
-          channel-priority: strict
-          mamba-version: "*"
-          activate-environment: hydrodata-tests
-          auto-update-conda: false
-          python-version: ${{ matrix.python-version }}
-          use-only-tar-bz2: true
-      - name: Install conda dependencies
-        run: |-
-          mamba env update -f $CONDA_ENV_FILE
+      - name: Install dependencies
+        run: |
+          pip install sphinx furo myst-parser sphinx-inline-tabs sphinx-copybutton
       - name: Sphinx build
         run: |
           sphinx-build docs/source docs/_build
