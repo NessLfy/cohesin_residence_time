@@ -13,6 +13,14 @@ def zoomed_image(logger:logging.Logger,im:np.array, center:tuple, size:int) -> n
     This function takes in an image array and returns a zoomed image array.
     The zoomed image is a square of size 'size' centered at 'center'.
     If the zoomed image is out of bounds, the function returns the original image.
+
+    Args:
+        im (np.array): Image array
+        center (tuple): Center of the zoomed image
+        size (int): Size of the zoomed image
+
+    Returns:
+        np.array: Zoomed image array
     """
 
     # Calculate the top left and bottom right coordinates of the square
@@ -46,6 +54,12 @@ def compute_lab (im_roi:np.array) -> np.array:
     This function takes in an image array and returns a labelled image array.
     The labelled image is obtained by thresholding the image using Otsu's method.
     The labelled image is then eroded and filled to remove noise and avoid computing the intensity of neighboring cells.
+
+    Args:
+        im_roi (np.array): Image array
+
+    Returns:
+        np.array: Labelled image array
     """
 
     labels_final = np.zeros_like(im_roi)
@@ -64,6 +78,13 @@ def overlap(im_lab:np.array,center:tuple) -> list:
     This function takes in a labelled image array and the coordinate of the center of the cell to consider and returns a list of images containing only one label correspong to the tracked-cell.
     The list of labels is obtained by computing the overlap between the labelled image and its subsequent frames.
     The label with the highest overlap (IoU) is chosen as the label for the subsequent frame.
+
+    Args:
+        im_lab (np.array): Labelled image array
+        center (tuple): Center of the tracked-cell
+    
+    Returns:
+        list: List of labels
     """
 
     labs = []
@@ -117,10 +138,11 @@ def _create_logger(name: str) -> logging.Logger:
     Create logger which logs to <timestamp>-<name>.log inside the current
     working directory.
 
-    Parameters
-    ----------
-    name
-        Name of the logger instance.
+    Args: 
+        name (str): Name of the logger
+    
+    Returns:
+        logging.Logger: Logger
     """
     logger = logging.Logger(name.capitalize())
     now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
