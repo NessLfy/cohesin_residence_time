@@ -55,6 +55,7 @@ def main() -> None:
 
     interpolation_values = questionary.path("Interpolation values:").ask()
     if interpolation_values == "": interpolation_values =  [0,1,2,3,5, 24, 49, 74, 99, 124, 149, 174, 199, 224, 249]
+    if frame_actualization == 10 : interpolation_values = [0, 1, 2, 3, 5, 14, 24, 34, 44, 54, 64, 74, 84, 94, 104, 114, 124, 134, 144, 154, 164, 174, 184, 194, 204, 214, 224, 234, 244, 249]
 
     save_path = questionary.path("Save path:").ask()
     if save_path == "": save_path = '/Users/louaness/Documents/cohesin_residence_time/runs/'
