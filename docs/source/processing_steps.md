@@ -58,10 +58,105 @@ The program will ask for a number and to click on n cells to analyze. These cell
 
 5. Step 5: Select rois and measure intensity
 
-(in-progress)
+The user is asked to input the number of cells (ROIs) they want to analyze. The number of cells processed is then logged.
 
-Please note that this is a general documentation for more detailed information see the actual function in ipa/run_analysis.py
+Loop over the selected cells: For each cell, the following steps are performed:
 
-## Extracting the iFRAP curve
+- The coordinates of the cell are converted to integers and stored in `c`.
+- The `zoomed_image` function is called to crop the image around the selected cell. The cropped image is stored in `im_r`.
+The shape of the cropped image is logged.
+- Instructions are printed for the user to click on the center of the unbleached spot, then on the bleached spot, and finally on the background of the cropped image. The user is also instructed to press any key to end the selection. The frequency of image actualization is logged.
 
-(in-progress)
+- Create patches for visualization: Three patches (circles) are created for each of the two axes (`ax[1] and ax[2]`). These patches will be used to visualize the unbleached spot, the bleached spot, and the background in the image.
+
+- Initialize the previous frame: The variable previous_frame is initialized to 0. This variable will be used to keep track of the previous frame when looping through the frames of the image.
+
+- Loop over the frames of the image: For each frame in the image, the following steps are performed:
+
+    - If the current frame is a multiple of `frame_actualization` or is in `frame_pre_bleach`, the counter is incremented by 1.
+
+    - The current frame is displayed on `ax[0]` with a title indicating the frame number.
+
+    - If the current frame is less than or equal to the FRAP frame, the FRAP frame is displayed on `ax[1]` with a title indicating the FRAP frame and the previous frame. Otherwise, the current frame is displayed on `ax[1]` with a title indicating the current frame and the previous frame.
+
+    - If the current frame is not the first frame, the previous frame is displayed on `ax[2]` with a title indicating the previous frame. Otherwise, the current frame is displayed on `ax[2]` with a title indicating the current frame.
+
+    - Get the coordinates of the unbleached spot, the bleached spot, and the background: The `plt.ginput(3)` function is used to get the coordinates of three points in the image. These points represent the unbleached spot, the bleached spot, and the background.
+
+    - Create arrays of indices: Arrays of indices are created for the height and width of the image. These arrays will be used to create binary masks for the unbleached spot, the bleached spot, and the background.
+
+    - Create binary masks: Binary masks are created for the unbleached spot, the bleached spot, and the background. In these masks, the pixels inside the circles are True.
+
+    - Extract pixel values: The binary masks are used to index into the image and extract the pixel values for the unbleached spot, the bleached spot, and the background.
+
+    - Update the coordinates and radii of the circle patches: The coordinates and radii of the circle patches are updated to match the selected spots. This is done for both sets of patches (`c_plot` and `c_plot_2`).
+
+    - Compute the mean intensity of the pixels inside the circles: The mean intensity of the pixels inside the circles is computed for the unbleached spot, the bleached spot, and the background. These mean intensities are appended to their respective lists.
+
+    - Append the current frame number to the frames list: The current frame number is appended to the frames list.
+
+- Finally:
+    - Create interpolation functions: Interpolation functions are created for the mean intensity lists of the unbleached spot, the bleached spot, and the background. These functions will be used to interpolate the data at new x values.
+
+    - Create new x values for interpolation: A new array of x values is created, ranging from 0 to the number of frames in the image.
+
+    - Interpolate the data at new x values: The interpolation functions are used to interpolate the data at the new x values. The interpolated values are stored in `interpolated_values_unbleached`, `interpolated_values_bleached`, and `interpolated_values_background`.
+
+    - Compute the iFRAP curve: The iFRAP curve is computed as the difference between the interpolated values of the unbleached and bleached spots, divided by the difference between the mean intensity of the bleached cells and the interpolated values of the background.
+
+    - Append the iFRAP curve to the ifrap list: The computed iFRAP curve is appended to the `ifrap` list.
+
+    - Create dataframes for the raw and interpolated data: Two dataframes are created, one for the raw data and one for the interpolated data. The dataframes contain the mean intensity lists and the interpolated values for the unbleached spot, the bleached spot, and the background. They also contain a column for the nucleus index and a column for the mean intensity of the unfrapped cells.
+
+    - Append the dataframes to the `df_list_raw` and `df_list_interp` lists: The created dataframes are appended to the df_list_raw and df_list_interp lists.
+
+- Remove the circle patches from the axes: The circle patches that were added to the axes for visualization are removed. This is done for all six patches (`c_plot`, `c_plot_b`, `c_plot_2`, `c_plot_b_2`, `c_plot_bck`, and `c_plot_bck_2`).
+
+
+**Please note that this is a general documentation for more detailed information see the actual function in `ipa/run_analysis.py`**
+
+ 
+ ## Analysis of the curves
+ 
+For every file the interpolated dataframe is opened and combined with all other replicates. The data is then further normalized *per-nuclei*
+
+ ### Normalizing the data
+
+The data is normalized follwing these steps: 
+
+1. Initialize a counter: A counter is initialized to 0. This counter is incremented in each iteration of the loop, but it doesn't seem to be used elsewhere in the function.
+
+2. Loop over unique nuclei: The function loops over each unique nucleus in the dataframe `df_wapl`.
+
+3. Calculate mean values: For each nucleus, the function calculates two mean values at time 5:
+    - `mean`: The difference between the interpolated values of the unbleached and bleached spots.
+    - `mean_r`: The difference between the unfrapped cell and the interpolated background values.
+
+
+4. Calculate normalization constant `C`: The normalization constant `C` is calculated as the ratio of `mean` to `mean_r`. The first value of `C` is then extracted.
+
+5. Calculate iFRAP values: The `iFRAP` values are calculated as the absolute value of the difference between the interpolated values of the unbleached and bleached spots, divided by the difference between the unfrapped cell and the interpolated background values, and then divided by the absolute value of `C`. The iFRAP values are then extracted.
+
+6. Assign iFRAP values to the dataframe: The calculated iFRAP values are assigned to a new column 'iFRAP' in the dataframe `df_wapl` for the corresponding nucleus.
+
+The function does not return anything, but it modifies the input dataframe `df_wapl` in-place by adding a new column 'iFRAP' with the calculated iFRAP values.
+
+### Fitting
+
+The data is fitted in the follwing way:
+
+1. Import the `curve_fit` function: The [curve_fit](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve%5Ffit.html) function from the [scipy.optimize](https://docs.scipy.org/doc/scipy/tutorial/optimize.html) module is imported. This function is used to fit a function to data.
+
+2. Define the x values: The unique time values from the dataframe `df_nipbl_comb_m` are retrieved, starting from the 6th value (Python uses 0-based indexing). These values are then multiplied by 0.5 to convert to seconds.
+
+3. Define the y values: The iFRAP values from the dataframe `df_nipbl_comb_m` are retrieved, starting from the 6th value.
+
+4. Fit the function to the data: The `curve_fit` function is used to fit the `double_exp` function to the data. The initial guess for the parameters is given by `p0=[0.5,0.5,0.01,0.01,0.5]`, and the bounds for the parameters are set to be between 0 and 1. The `curve_fit` function returns two outputs:
+    - `popt`: Optimal values for the parameters so that the sum of the squared residuals of `double_exp(x, *popt)` - y is minimized.
+    - `pcov`: The estimated covariance of `popt`. The diagonals provide the variance of the parameter estimate.
+
+The `double_exp` function is a Python function that calculates a double exponential decay. Here's a breakdown of its components:
+    - `t`: This is the time variable. In the context of the previous code snippet, it corresponds to the unique time values from the dataframe `df_nipbl_comb_m`.
+    - `a1`, `a2`: These are the amplitudes of the two exponential components. They determine the initial value of each decay component at time t=0.
+    - `k1`, `k2`: These are the decay constants of the two exponential components. They determine the rate at which each component decays over time.
+    - `offset`: This is a constant value that is added to the result. It effectively shifts the entire decay curve up or down.
