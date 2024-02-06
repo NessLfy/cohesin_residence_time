@@ -14,7 +14,7 @@ from interactive_analysis_utils import zoomed_image, compute_lab, overlap, _crea
 import questionary
 
 import pandas as pd
-
+import cProfile
 
 def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
          frame_actualization:int,frame_pre_bleach:list,
@@ -57,7 +57,12 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     logger.info(f"Loading image: {im_path}\n")
 
     # Load the image
-    im = tiff.imread(im_path)
+
+    try:
+        im = tiff.imread(im_path)
+    except Exception as e:
+        logger.error(f"Error loading image: {e}\n, the path to the image is {im_path}\n")
+        sys.exit(1)
 
     # Display the image
 
@@ -347,6 +352,8 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         c_plot_b.remove()
         c_plot_2.remove()
         c_plot_b_2.remove()
+        c_plot_bck.remove()
+        c_plot_bck_2.remove()
 
     
     # save the data
@@ -373,4 +380,11 @@ if __name__ == "__main__":
     with open(path+'/'+CONFIG_NAME, "r") as f:
         config = yaml.safe_load(f)
 
+    # DEBUG
+    # profiler = cProfile.Profile()
+    # profiler.enable()
     main(**config)
+    # profiler.disable()
+    # profiler.print_stats(sort='time')
+    # profiler.dump_stats("profiler_results.pstats")
+    # END DEBUG
