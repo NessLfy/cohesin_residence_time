@@ -42,5 +42,5 @@ interpolation_values:
 name_of_experiment: 20240124_NIPBL_FKBP_nodtag_30_LP_1
 radius_bleach_spot: 7
 radius_unbleach_spot: 5
-save_path: /Users/louaness/Documents/cohesin_residence_time/runs/20240124_NIPBL_FKBP_noaux_30_LP_1
+save_path: /Users/louaness/Documents/cohesin_residence_time/runs/20240124_NIPBL_FKBP_nodtag_30_LP_1
 size_of_bbox_zoom: 100

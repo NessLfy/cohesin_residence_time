@@ -7,7 +7,7 @@ frame_pre_bleach:
 - 3
 - 5
 - 249
-im_path: '/Volumes/tungsten/scratch/ggiorget/nessim/microscopy_data/FRAP_Rad21_halo/20240116_FRAP_NIPBL_FKBP/20240116_FRAP_NIPBL_FKBP_Rad21_Halo_561_40_LP_1_conf561Triple-LP-FRAP.ome.tf2'
+im_path: /Volumes/tungsten/scratch/ggiorget/nessim/microscopy_data/FRAP_Rad21_halo/20240116_FRAP_NIPBL_FKBP/20240116_FRAP_NIPBL_FKBP_Rad21_Halo_561_40_LP_1_conf561Triple-LP-FRAP.ome.tf2
 interpolation_values:
 - 0
 - 1
@@ -39,9 +39,8 @@ interpolation_values:
 - 234
 - 244
 - 249
-
-name_of_experiment: 20240116_NIPBL_FKBP_nodtag
+name_of_experiment: 20240116_NIPBL_FKBP_nodtag_40_LP
 radius_bleach_spot: 7
 radius_unbleach_spot: 5
-save_path: /Users/louaness/Documents/cohesin_residence_time/cohesin_residence_time/runs/20240116_NIPBL_FKBP_nodtag
+save_path: /Users/louaness/Documents/cohesin_residence_time/runs/20240116_NIPBL_FKBP_nodtag_40_LP
 size_of_bbox_zoom: 100

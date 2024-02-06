@@ -8,7 +8,7 @@ frame_pre_bleach:
 - 5
 - 249
 im_path: /Volumes/tungsten/scratch/ggiorget/nessim/microscopy_data/FRAP_Rad21_halo/20240124_FRAP_NIPBL_FKBP/20240124_FRAP_NIPBL_FKBP_nodtag_Rad21_Halo_561_30_LP_2_conf561Triple-LP-FRAP.ome.tf2
-interpolation_values:
+interpolation_values: 
 - 0
 - 1
 - 2
