@@ -227,7 +227,6 @@ scratchpad/test_interactive.py
 /scratchpad/test_yaml.yml
 /scratchpad/test_analysis_FRAP.ipynb
 /scratchpad/analyze_data_exploratory.ipynb
-
-scratchpad/*.ipynb
+/scratchpad/combine_sequence_files.ipynb
 plots/
 presentations/
