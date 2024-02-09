@@ -226,6 +226,8 @@ scratchpad/test_interactive.py
 /runs/20240116_NIPBL_FKBP_nodtag_40_LP/20240116_NIPBL_FKBP_nodtag_int_im.tif
 /scratchpad/test_yaml.yml
 /scratchpad/test_analysis_FRAP.ipynb
-/scratchpad/analyze_data.ipynb
+/scratchpad/analyze_data_exploratory.ipynb
 
 scratchpad/*.ipynb
+plots/
+presentations/
