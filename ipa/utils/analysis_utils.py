@@ -32,8 +32,13 @@ def concat_runs(pattern:list, path:str = '/Users/louaness/Documents/cohesin_resi
         Path to the runs
     """
     df_wapl_d = []
-    for l,i in enumerate(os.listdir(path)):
-        if pattern[0] in i and pattern[1] in i:
+    list_files = os.listdir(path)
+    for l,i in enumerate(list_files):
+        counter = 0
+        for pat in pattern:
+            if pat in i:
+                counter +=1 
+        if counter >=2:
             path_df = path+i
             try:
                 df_interp_wapl = opendata(path_df)
@@ -41,7 +46,7 @@ def concat_runs(pattern:list, path:str = '/Users/louaness/Documents/cohesin_resi
                 df_interp_wapl['replicate'] = i
                 df_wapl_d.append(df_interp_wapl)
             except:
-                print('error')
+                print(f'Error, the file {i} could not be opened, might not contain data or is not analized yet.')
                 continue
 
     df_wapl_d = pd.concat(df_wapl_d)
@@ -93,7 +98,7 @@ def compute_offset(df_wapl:pd.DataFrame)->None:
 def double_exp(t,a1,a2,k1,k2,offset):
     return a1*np.exp(-k1*t) + a2*np.exp(-k2*t)+offset
 
-def fit_df(df) -> tuple:
+def fit_df(df,offset) -> tuple:
     """
     Fit the dataframe with the iFRAP values to a double exponential function
 
@@ -112,7 +117,6 @@ def fit_df(df) -> tuple:
     x = df.time.unique()[5:]
     x = x*0.5
     y = df.iFRAP[5:] 
-    offset = compute_offset(df)
     partial_double_exp = partial(double_exp,offset=offset)
 
     popt,pcov = curve_fit(partial_double_exp, x, y,p0=[0.5,0.5,0.01,0.01],bounds=([0,0,0,0],[1,1,1,1]))
