@@ -95,8 +95,8 @@ def compute_offset(df_wapl:pd.DataFrame)->None:
         return np.mean(np.abs(C))
     
 
-def double_exp(t,a1,a2,k1,k2,offset):
-    return a1*np.exp(-k1*t) + a2*np.exp(-k2*t)+offset
+def double_exp(t,a1,k1,k2,offset):
+    return a1*np.exp(-k1*t) + (1-a1)*np.exp(-k2*t)+offset
 
 def fit_df(df,offset) -> tuple:
     """
@@ -119,7 +119,7 @@ def fit_df(df,offset) -> tuple:
     y = df.iFRAP[5:] 
     partial_double_exp = partial(double_exp,offset=offset)
 
-    popt,pcov = curve_fit(partial_double_exp, x, y,p0=[0.5,0.5,0.01,0.01],bounds=([0,0,0,0],[1,1,1,1]))
+    popt,pcov = curve_fit(partial_double_exp, x, y,p0=[0.5,0.075,0.01],bounds=([0,0.05,0.001],[1,0.2,0.021]))
 
     sd = np.sqrt(np.diag(pcov))
 
