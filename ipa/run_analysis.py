@@ -176,10 +176,10 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     df_list_raw = []
     df_list_interp = []
 
-    _,ax = plt.subplots(1,3,figsize=(15,5))
+    
     # loop over the selected cells
     for index,coord in enumerate(coords):
-
+        fig,ax = plt.subplots(1,3,figsize=(15,5))
         c = [int(x) for x in list(coord)]
         center = c 
         size = size_of_bbox_zoom 
@@ -304,6 +304,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         if plt.waitforbuttonpress():
             plt.close()
 
+        
         logger.info(f"Mean intensity of unbleached spot: {mean_list_unbleached}\n")
         logger.info(f"Mean intensity of bleached spot: {mean_list_bleached}\n")
 
@@ -354,8 +355,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         c_plot_b_2.remove()
         c_plot_bck.remove()
         c_plot_bck_2.remove()
-
-    
+        fig.clear()
     # save the data
     np.save(save_path.split('/')[-1]+'.npy',ifrap)
     df_list_raw = pd.concat(df_list_raw)
