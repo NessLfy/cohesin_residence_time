@@ -6,7 +6,7 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from scipy.interpolate import interp1d
+# from scipy.interpolate import interp1d
 import sys
 import os
 sys.path.insert(0,"/Users/louaness/Documents/cohesin_residence_time/ipa/utils/")
@@ -14,12 +14,13 @@ from interactive_analysis_utils import zoomed_image, compute_lab, overlap, _crea
 import questionary
 
 import pandas as pd
-import cProfile
+# DEBUG
+# import cProfile
 
 def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
          frame_actualization:int,frame_pre_bleach:list,
          radius_unbleach_spot:int,radius_bleach_spot:int,
-         interpolation_values:list,save_path:str,name_of_experiment:str) -> None:
+         save_path:str,name_of_experiment:str) -> None:
     """
     Run the analysis pipeline.
     
@@ -32,7 +33,6 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     frame_pre_bleach, list: list of frames before the FRAP
     radius_unbleach_spot, int: radius of the unbleached spot
     radius_bleach_spot, int: radius of the bleached spot
-    interpolation_values, list: list of interpolation values
     save_path, str: path to save the results
     name_of_experiment, str: name of the experiment
     """
@@ -52,7 +52,6 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     logger.info(f"Frame pre bleach: {frame_pre_bleach}\n")
     logger.info(f"Radius unbleach spot: {radius_unbleach_spot}\n")
     logger.info(f"Radius bleach spot: {radius_bleach_spot}\n")
-    logger.info(f"Interpolation values: {interpolation_values}\n")
 
     logger.info(f"Loading image: {im_path}\n")
 
@@ -224,9 +223,10 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         ax[2].add_patch(c_plot_bck_2)
 
         previous_frame = 0 # initialize the previous frame to 0 to be able to plot both the actual and previous frame
-
+        interpolation_values = []
         for i in range(0,im_r.shape[0]):
             if counter % frame_actualization == 0 or i in frame_pre_bleach:
+                interpolation_values.append(i)
                 counter += 1
                 # Display the image
                 ax[0].imshow(im_r[i,...], cmap='viridis')                
@@ -308,21 +308,27 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         logger.info(f"Mean intensity of unbleached spot: {mean_list_unbleached}\n")
         logger.info(f"Mean intensity of bleached spot: {mean_list_bleached}\n")
 
-        # Original x values
-        x_values = np.array(interpolation_values)
+        # # Create interpolation function
+        # f_unbleach = interp1d(x_values, mean_list_unbleached, kind='linear')
+        # f_bleach = interp1d(x_values, mean_list_bleached, kind='linear')
+        # f_background = interp1d(x_values, mean_list_background, kind='linear')
 
-        # Create interpolation function
-        f_unbleach = interp1d(x_values, mean_list_unbleached, kind='linear')
-        f_bleach = interp1d(x_values, mean_list_bleached, kind='linear')
-        f_background = interp1d(x_values, mean_list_background, kind='linear')
+        # # New x values for interpolation
+        # x_new = np.arange(0, im.shape[0])
 
-        # New x values for interpolation
-        x_new = np.arange(0, im.shape[0])
+        # # Interpolate the data at new x values
+        # interpolated_values_unbleached = f_unbleach(x_new)
+        # interpolated_values_bleached = f_bleach(x_new)
+        # interpolated_values_background = f_background(x_new)
+        # Assuming df_r.mean_list_unbleached is a list of your values
 
-        # Interpolate the data at new x values
-        interpolated_values_unbleached = f_unbleach(x_new)
-        interpolated_values_bleached = f_bleach(x_new)
-        interpolated_values_background = f_background(x_new)
+        # Define the new x values
+        new_x_values = np.arange(0, 250, 1)
+
+        # Perform the interpolation
+        interpolated_values_unbleached = np.interp(new_x_values, interpolation_values, mean_list_unbleached)
+        interpolated_values_bleached = np.interp(new_x_values, interpolation_values, mean_list_bleached)
+        interpolated_values_background = np.interp(new_x_values, interpolation_values, mean_list_background)
 
         # Compute the iFRAP curve
         iFRAP = (interpolated_values_unbleached-interpolated_values_bleached)/(np.mean(intensity_bleach,axis=0) - interpolated_values_background) #compute the iFRAP curve as defined by Gabriele et al. science 2022
@@ -365,7 +371,9 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     df_list_raw.to_csv(save_path.split('/')[-1]+'_raw.csv')
     df_list_interp.to_csv(save_path.split('/')[-1]+'_interp.csv')
 
+    logger.info(f"The values were interpolated at {interpolation_values} \n")
     logger.info(f"Created the output file {save_path.split('/')[-1]}.npy\n")
+
     logger.info("Done!")
 
 
