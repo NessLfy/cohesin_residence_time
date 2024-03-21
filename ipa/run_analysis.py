@@ -305,7 +305,6 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
                         index=['mean_list_bleached','mean_list_unbleached'])
                     df = df.T
                     df['nucleus'] = [index]*len(df)
-                    df['unfrap_cell'] = [np.mean(intensity_bleach,axis=0)[fra] for fra in frames]
 
                     # save coordinates of the ROI
 
@@ -375,7 +374,6 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
                           index=['mean_list_bleached','mean_list_unbleached'])
         df = df.T
         df['nucleus'] = [index]*len(df)
-        df['unfrap_cell'] = [np.mean(intensity_bleach,axis=0)[fra] for fra in frames]
 
         df_list_raw.append(df)
 
@@ -397,10 +395,10 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
   
     df_list_raw = pd.concat(df_list_raw)
     df_list_raw.rename(columns={'Unnamed: 0':'time'},inplace=True)
-    df_list_raw.to_csv(save_path.split('/')[-1]+f'_raw_{token}.csv')
+    df_list_raw.to_csv(save_path.split('/')[-1]+f'_raw_{token}.csv',index=False)
     df_ROI = pd.concat(df_ROI)
     df_ROI.rename(columns={'Unnamed: 0':'time'},inplace=True)
-    df_ROI.to_csv(save_path.split('/')[-1]+f'_ROI_{token}.csv')
+    df_ROI.to_csv(save_path.split('/')[-1]+f'_ROI_{token}.csv',index=False)
 
     logger.info(f"The values were interpolated at {interpolation_values} \n")
     # logger.info(f"Created the output file {save_path.split('/')[-1]}.npy\n")
