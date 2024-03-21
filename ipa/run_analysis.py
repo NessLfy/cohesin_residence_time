@@ -251,9 +251,29 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
                 radius = radius_unbleach_spot
                 radius_b = radius_bleach_spot
                 # Create a circle patch
-                a = plt.ginput(2) # select the unbleached spot, the bleached spot and the background
-                x,y = a[0]
-                x_b,y_b = a[1]
+                try:
+                    a = plt.ginput(2) # select the unbleached spot, the bleached spot and the background
+                    x,y = a[0]
+                    x_b,y_b = a[1]
+                except IndexError:
+                    df = pd.DataFrame([mean_list_bleached,mean_list_unbleached],
+                        index=['mean_list_bleached','mean_list_unbleached'])
+                    df = df.T
+                    df['nucleus'] = [index]*len(df)
+                    df['unfrap_cell'] = [np.mean(intensity_bleach,axis=0)[fra] for fra in frames]
+
+                    # save coordinates of the ROI
+
+                    df_ROI = pd.DataFrame(coords_ROI_list)
+
+                    # save the data
+
+                    df.rename(columns={'Unnamed: 0':'time'},inplace=True)
+                    df.to_csv(save_path.split('/')[-1]+f'_raw_v3_stopped_at_{i}.csv')
+
+                    df_ROI.to_csv(save_path.split('/')[-1]+f'_ROI_stopped_at_{i}.csv')
+
+                    logger.info(f"The analysis was stopped at frame {i}\n")
                 
                 coords_ROI['unbleached'] = [x,y]
                 coords_ROI['bleached'] = [x_b,y_b]
