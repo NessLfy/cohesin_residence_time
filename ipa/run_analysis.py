@@ -12,6 +12,7 @@ import os
 sys.path.insert(0,"/Users/louaness/Documents/cohesin_residence_time/ipa/utils/")
 from interactive_analysis_utils import zoomed_image, compute_lab, overlap, _create_logger
 import questionary
+import secrets
 
 import pandas as pd
 # DEBUG
@@ -54,6 +55,10 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     logger.info(f"Radius bleach spot: {radius_bleach_spot}\n")
 
     logger.info(f"Loading image: {im_path}\n")
+
+    # generate token to save the data
+
+    token = secrets.token_hex(6) # 6 hex digits
 
     # Load the image
 
@@ -145,6 +150,48 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     ## DEBUG
     #np.save(save_path.split('/')[-1]+'_intensity_bleach.npy',intensity_bleach)
     ## END DEBUG
+
+    # Analyze background level of the image
+
+    print('Start by measuring background level, select a region without any cells')
+
+    fig,ax = plt.subplots(1,3,figsize=(20,5))
+    ax[0].imshow(im[0,...],cmap='viridis')
+    ax[1].imshow(im[FRAP_frame,...],cmap='viridis')
+    ax[2].imshow(im[-1,...],cmap='viridis')
+    ax[0].set_title('pre-FRAP image')
+    ax[1].set_title('post-FRAP image')
+    ax[2].set_title('Last frame')
+
+    for a in ax:
+        a.axis('off')
+
+    fig.tight_layout()
+
+    coords = plt.ginput(1)
+
+    if plt.waitforbuttonpress():
+        plt.close()
+
+    coords = [int(x) for x in coords[0]]
+
+    radius_back  = 7
+
+    height, width = im[0,...].shape
+
+    x,y = coords
+
+    y_indices, x_indices = np.ogrid[:height, :width]
+
+    # Create a binary mask where the pixels inside the circle are True
+    mask_back = (x_indices - x)**2 + (y_indices - y)**2 <= radius_back**2
+
+    # Use the mask to index into the image and extract the pixel values (for every frame)
+    pixels_back = [im[i,...][mask_back] for i in range(im.shape[0])]
+    
+    # save the mask with the background intensity
+
+    np.save(save_path.split('/')[-1]+'_mask_back_'+token+'.npy',pixels_back)
 
     # start analyzing the FRAPed cells
     number = questionary.path('How many cells (ROIs) do you want to analyze?').ask()
@@ -269,9 +316,9 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
                     # save the data
 
                     df.rename(columns={'Unnamed: 0':'time'},inplace=True)
-                    df.to_csv(save_path.split('/')[-1]+f'_raw_v3_stopped_at_{i}.csv')
+                    df.to_csv(save_path.split('/')[-1]+f'_raw_stopped_at_{i}_{token}.csv')
 
-                    df_ROI.to_csv(save_path.split('/')[-1]+f'_ROI_stopped_at_{i}.csv')
+                    df_ROI.to_csv(save_path.split('/')[-1]+f'_ROI_stopped_at_{i}_{token}.csv')
 
                     logger.info(f"The analysis was stopped at frame {i}\n")
                 
@@ -352,13 +399,13 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
   
     df_list_raw = pd.concat(df_list_raw)
     df_list_raw.rename(columns={'Unnamed: 0':'time'},inplace=True)
-    df_list_raw.to_csv(save_path.split('/')[-1]+'_raw_v3.csv')
+    df_list_raw.to_csv(save_path.split('/')[-1]+f'_raw_{token}.csv')
     df_ROI = pd.concat(df_ROI)
     df_ROI.rename(columns={'Unnamed: 0':'time'},inplace=True)
-    df_ROI.to_csv(save_path.split('/')[-1]+'_ROI.csv')
+    df_ROI.to_csv(save_path.split('/')[-1]+f'_ROI_{token}.csv')
 
     logger.info(f"The values were interpolated at {interpolation_values} \n")
-    logger.info(f"Created the output file {save_path.split('/')[-1]}.npy\n")
+    # logger.info(f"Created the output file {save_path.split('/')[-1]}.npy\n")
 
     logger.info("Done!")
 
