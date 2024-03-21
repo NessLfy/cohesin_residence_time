@@ -230,3 +230,6 @@ scratchpad/test_interactive.py
 /scratchpad/combine_sequence_files.ipynb
 plots/
 presentations/
+/ipa/run_analysis_interpolation_test.py
+/scratchpad/test_interpolation.ipynb
+/runs/20240207_FRAP_NIPBL_FKBP_6hdtag_LP_30_s1_interpolation/*
