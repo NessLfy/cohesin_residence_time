@@ -10,7 +10,7 @@ import matplotlib.patches as patches
 import sys
 import os
 sys.path.insert(0,"/Users/louaness/Documents/cohesin_residence_time/ipa/utils/")
-from interactive_analysis_utils import zoomed_image, compute_lab, overlap, _create_logger
+from interactive_analysis_utils import zoomed_image, compute_lab, overlap, _create_logger # type: ignore
 import questionary
 import secrets
 
