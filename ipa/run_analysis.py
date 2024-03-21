@@ -147,9 +147,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
 
     logger.info(f'mean unfrapped cell intensity: {intensity_bleach}\n')
 
-    ## DEBUG
-    #np.save(save_path.split('/')[-1]+'_intensity_bleach.npy',intensity_bleach)
-    ## END DEBUG
+    np.save(save_path.split('/')[-1]+f'_intensity_bleach_{token}.npy',intensity_bleach)
 
     # Analyze background level of the image
 
