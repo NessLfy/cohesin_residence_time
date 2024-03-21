@@ -1,5 +1,5 @@
 FRAP_frame: 4
-frame_actualization: 10
+frame_actualization: 5
 frame_pre_bleach:
 - 0
 - 1
