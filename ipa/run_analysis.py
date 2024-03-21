@@ -171,11 +171,9 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     print('You entered %s' % coords)
 
     # lists that will contain the iFRAP curves, the raw data and the interpolated data
-    ifrap = []
     df_list_raw = []
-    df_list_interp = []
+    df_ROI = []
 
-    
     # loop over the selected cells
     for index,coord in enumerate(coords):
         fig,ax = plt.subplots(1,3,figsize=(15,5))
@@ -192,7 +190,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
 
         mean_list_bleached = []
         mean_list_unbleached = []
-        mean_list_background = []
+        coords_ROI_list = []
 
         frames = []
         # Get the shape of your image
@@ -226,6 +224,7 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         interpolation_values = []
         for i in range(0,im_r.shape[0]):
             if counter % frame_actualization == 0 or i in frame_pre_bleach:
+                coords_ROI = {}
                 interpolation_values.append(i)
                 counter += 1
                 # Display the image
@@ -252,45 +251,42 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
                 radius = radius_unbleach_spot
                 radius_b = radius_bleach_spot
                 # Create a circle patch
-                a = plt.ginput(3) # select the unbleached spot, the bleached spot and the background
+                a = plt.ginput(2) # select the unbleached spot, the bleached spot and the background
                 x,y = a[0]
                 x_b,y_b = a[1]
-                x_bck,y_bck = a[2]
                 
+                coords_ROI['unbleached'] = [x,y]
+                coords_ROI['bleached'] = [x_b,y_b]
+                coords_ROI['frame'] = i
+                coords_ROI_list.append(coords_ROI)
+
                 # Create an array of indices
                 y_indices, x_indices = np.ogrid[:height, :width]
                 y_indices_b, x_indices_b = np.ogrid[:height, :width]
-                y_indices_bck, x_indices_bck = np.ogrid[:height, :width]
 
                 # Create a binary mask where the pixels inside the circle are True
                 mask_unbleached = (x_indices - x)**2 + (y_indices - y)**2 <= radius**2
                 mask_bleached = (x_indices_b - x_b)**2 + (y_indices_b - y_b)**2 <= radius_b**2
-                mask_background = (x_indices_bck - x_bck)**2 + (y_indices_bck - y_bck)**2 <= radius_b**2
 
                 # Use the mask to index into your image and extract the pixel values
                 pixels_in_unbleached = im_r[i,...][mask_unbleached]
                 pixels_in_bleached = im_r[i,...][mask_bleached]
-                pixels_in_background = im_r[i,...][mask_background]
 
                 # Actualize the coordinate of the circles to be able to plot them in the next frame
                 c_plot.center = x, y
                 c_plot.radius = radius
                 c_plot_b.center = x_b, y_b
                 c_plot_b.radius = radius_b
-                c_plot_bck.center = x_bck, y_bck
-                c_plot_bck.radius = radius_b
 
                 c_plot_2.center = x, y
                 c_plot_2.radius = radius
                 c_plot_b_2.center = x_b, y_b
                 c_plot_b_2.radius = radius_b
-                c_plot_bck_2.center = x_bck, y_bck
-                c_plot_bck_2.radius = radius_b
+
 
                 # compute the mean intensity of the pixels inside the circles
                 mean_list_unbleached.append(np.mean(pixels_in_unbleached))
                 mean_list_bleached.append(np.mean(pixels_in_bleached))
-                mean_list_background.append(np.mean(pixels_in_background))
                 frames.append(i)
 
                 for i in ax:
@@ -308,50 +304,20 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         logger.info(f"Mean intensity of unbleached spot: {mean_list_unbleached}\n")
         logger.info(f"Mean intensity of bleached spot: {mean_list_bleached}\n")
 
-        # # Create interpolation function
-        # f_unbleach = interp1d(x_values, mean_list_unbleached, kind='linear')
-        # f_bleach = interp1d(x_values, mean_list_bleached, kind='linear')
-        # f_background = interp1d(x_values, mean_list_background, kind='linear')
-
-        # # New x values for interpolation
-        # x_new = np.arange(0, im.shape[0])
-
-        # # Interpolate the data at new x values
-        # interpolated_values_unbleached = f_unbleach(x_new)
-        # interpolated_values_bleached = f_bleach(x_new)
-        # interpolated_values_background = f_background(x_new)
-        # Assuming df_r.mean_list_unbleached is a list of your values
-
-        # Define the new x values
-        new_x_values = np.arange(0, 250, 1)
-
-        # Perform the interpolation
-        interpolated_values_unbleached = np.interp(new_x_values, interpolation_values, mean_list_unbleached)
-        interpolated_values_bleached = np.interp(new_x_values, interpolation_values, mean_list_bleached)
-        interpolated_values_background = np.interp(new_x_values, interpolation_values, mean_list_background)
-
-        # Compute the iFRAP curve
-        iFRAP = (interpolated_values_unbleached-interpolated_values_bleached)/(np.mean(intensity_bleach,axis=0) - interpolated_values_background) #compute the iFRAP curve as defined by Gabriele et al. science 2022
-
-        ifrap.append(iFRAP)
-
         # put all the data in a dataframe
 
-        df = pd.DataFrame([mean_list_background,mean_list_bleached,mean_list_unbleached],
-                          index=['mean_list_background','mean_list_bleached','mean_list_unbleached'])
+        df = pd.DataFrame([mean_list_bleached,mean_list_unbleached],
+                          index=['mean_list_bleached','mean_list_unbleached'])
         df = df.T
         df['nucleus'] = [index]*len(df)
         df['unfrap_cell'] = [np.mean(intensity_bleach,axis=0)[fra] for fra in frames]
 
         df_list_raw.append(df)
 
-        df = pd.DataFrame([iFRAP,interpolated_values_background,interpolated_values_bleached,interpolated_values_unbleached],
-                          index=['iFRAP','interpolated_values_background','interpolated_values_bleached','interpolated_values_unbleached'])
-        
-        df = df.T
+        df = pd.DataFrame(coords_ROI_list)
         df['nucleus'] = [index]*len(df)
-        df['unfrap_cell'] = np.mean(intensity_bleach,axis=0)
-        df_list_interp.append(df)
+
+        df_ROI.append(df)
 
         # remove the circles between each analyzed cells
 
@@ -363,13 +329,13 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         c_plot_bck_2.remove()
         fig.clear()
     # save the data
-    np.save(save_path.split('/')[-1]+'.npy',ifrap)
+  
     df_list_raw = pd.concat(df_list_raw)
-    df_list_interp = pd.concat(df_list_interp)
-    df_list_interp.rename(columns={'Unnamed: 0':'time'},inplace=True)
     df_list_raw.rename(columns={'Unnamed: 0':'time'},inplace=True)
-    df_list_raw.to_csv(save_path.split('/')[-1]+'_raw.csv')
-    df_list_interp.to_csv(save_path.split('/')[-1]+'_interp.csv')
+    df_list_raw.to_csv(save_path.split('/')[-1]+'_raw_v3.csv')
+    df_ROI = pd.concat(df_ROI)
+    df_ROI.rename(columns={'Unnamed: 0':'time'},inplace=True)
+    df_ROI.to_csv(save_path.split('/')[-1]+'_ROI.csv')
 
     logger.info(f"The values were interpolated at {interpolation_values} \n")
     logger.info(f"Created the output file {save_path.split('/')[-1]}.npy\n")
