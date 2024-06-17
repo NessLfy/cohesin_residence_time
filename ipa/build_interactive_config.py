@@ -43,7 +43,7 @@ def main() -> None:
     else : frame_actualization = int(frame_actualization)
 
     frame_pre_bleach = questionary.path("Frame pre bleach:").ask()
-    if frame_pre_bleach == "": frame_pre_bleach = [0,1,2,3,5,249]
+    if frame_pre_bleach == "": frame_pre_bleach = [0,1,2,3,4,249]
 
     radius_unbleach_spot = questionary.path("Radius unbleach spot:").ask()
     if radius_unbleach_spot == "": radius_unbleach_spot = 5
@@ -71,7 +71,7 @@ def main() -> None:
         "frame_pre_bleach": frame_pre_bleach,
         "radius_unbleach_spot": radius_unbleach_spot,
         "radius_bleach_spot": radius_bleach_spot,
-        "interpolation_values": interpolation_values,
+        #"interpolation_values": interpolation_values,
         "save_path": os.path.join(save_path,name_of_experiment)
     }
 
