@@ -6,6 +6,11 @@
     :members:
 ```
 
+```{eval-rst}
+.. automodule:: scratchpad.interpolation_utils
+    :members:
+```
+
 ## Build config file
 
 ```{eval-rst}
