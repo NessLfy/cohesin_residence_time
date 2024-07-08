@@ -233,3 +233,5 @@ presentations/
 /ipa/run_analysis_interpolation_test.py
 /scratchpad/test_interpolation.ipynb
 /runs/20240207_FRAP_NIPBL_FKBP_6hdtag_LP_30_s1_interpolation/*
+/scratchpad/test_interpolation_clean.ipynb
+/scratchpad/*
