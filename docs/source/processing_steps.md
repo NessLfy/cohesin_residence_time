@@ -41,7 +41,7 @@ Once executed the program will ask for the following questions:
 
 ## Running the GUI
 
-1. Step 1: Parseyaml config file
+1. Step 1: Parse yaml config file
 
 The function starts by opening and parsing the yaml file for the parameters used in the analysis. 
 
@@ -56,7 +56,11 @@ The data is expected to be in a specific format for the analysis to work correct
 4. Step 4: Preprocess unfrapped cells
 The program will ask for a number and to click on n cells to analyze. These cells should not have been FRAP. The cells will be segmented using Otsu's method and tracked using IoU mask-overlapping. For better efficiency please select cells that are not too close together or think about implementing another type of segmentation.
 
-5. Step 5: Select rois and measure intensity
+5. Step 5: Select the background region
+
+The program will ask to click on a region that doesn't contain any cells during the whole movie.
+
+6. Step 6: Select rois and measure intensity
 
 The user is asked to input the number of cells (ROIs) they want to analyze. The number of cells processed is then logged.
 
@@ -114,49 +118,3 @@ The shape of the cropped image is logged.
 
 
 **Please note that this is a general documentation for more detailed information see the actual function in `ipa/run_analysis.py`**
-
- 
- ## Analysis of the curves
- 
-For every file the interpolated dataframe is opened and combined with all other replicates. The data is then further normalized *per-nuclei*
-
- ### Normalizing the data
-
-The data is normalized follwing these steps: 
-
-1. Initialize a counter: A counter is initialized to 0. This counter is incremented in each iteration of the loop, but it doesn't seem to be used elsewhere in the function.
-
-2. Loop over unique nuclei: The function loops over each unique nucleus in the dataframe `df_wapl`.
-
-3. Calculate mean values: For each nucleus, the function calculates two mean values at time 5:
-    - `mean`: The difference between the interpolated values of the unbleached and bleached spots.
-    - `mean_r`: The difference between the unfrapped cell and the interpolated background values.
-
-
-4. Calculate normalization constant `C`: The normalization constant `C` is calculated as the ratio of `mean` to `mean_r`. The first value of `C` is then extracted.
-
-5. Calculate iFRAP values: The `iFRAP` values are calculated as the absolute value of the difference between the interpolated values of the unbleached and bleached spots, divided by the difference between the unfrapped cell and the interpolated background values, and then divided by the absolute value of `C`. The iFRAP values are then extracted.
-
-6. Assign iFRAP values to the dataframe: The calculated iFRAP values are assigned to a new column 'iFRAP' in the dataframe `df_wapl` for the corresponding nucleus.
-
-The function does not return anything, but it modifies the input dataframe `df_wapl` in-place by adding a new column 'iFRAP' with the calculated iFRAP values.
-
-### Fitting
-
-The data is fitted in the follwing way:
-
-1. Import the `curve_fit` function: The [curve_fit](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve%5Ffit.html) function from the [scipy.optimize](https://docs.scipy.org/doc/scipy/tutorial/optimize.html) module is imported. This function is used to fit a function to data.
-
-2. Define the x values: The unique time values from the dataframe `df_nipbl_comb_m` are retrieved, starting from the 6th value (Python uses 0-based indexing). These values are then multiplied by 0.5 to convert to seconds.
-
-3. Define the y values: The iFRAP values from the dataframe `df_nipbl_comb_m` are retrieved, starting from the 6th value.
-
-4. Fit the function to the data: The `curve_fit` function is used to fit the `double_exp` function to the data. The initial guess for the parameters is given by `p0=[0.5,0.5,0.01,0.01,0.5]`, and the bounds for the parameters are set to be between 0 and 1. The `curve_fit` function returns two outputs:
-    - `popt`: Optimal values for the parameters so that the sum of the squared residuals of `double_exp(x, *popt)` - y is minimized.
-    - `pcov`: The estimated covariance of `popt`. The diagonals provide the variance of the parameter estimate.
-
-The `double_exp` function is a Python function that calculates a double exponential decay. Here's a breakdown of its components:
-    - `t`: This is the time variable. In the context of the previous code snippet, it corresponds to the unique time values from the dataframe `df_nipbl_comb_m`.
-    - `a1`, `a2`: These are the amplitudes of the two exponential components. They determine the initial value of each decay component at time t=0.
-    - `k1`, `k2`: These are the decay constants of the two exponential components. They determine the rate at which each component decays over time.
-    - `offset`: This is a constant value that is added to the result. It effectively shifts the entire decay curve up or down.

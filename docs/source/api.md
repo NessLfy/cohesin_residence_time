@@ -7,7 +7,7 @@
 ```
 
 ```{eval-rst}
-.. automodule:: scratchpad.interpolation_utils
+.. automodule:: ipa.utils.interpolation_utils
     :members:
 ```
 
