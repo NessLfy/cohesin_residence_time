@@ -10,8 +10,8 @@ def opendata(path:str)->pd.DataFrame:
     """
     Open the data from the path and return the dataframe
     """
-    df_raw = pd.read_csv(path+'/'+[x for x in os.listdir(path) if 'raw.csv' in x][0])
-    df_interp = pd.read_csv(path+'/'+[x for x in os.listdir(path) if 'interp.csv' in x][0])
+    df_raw = pd.read_csv(path+'/'+[x for x in os.listdir(path) if 'raw_v2.csv' in x][0])
+    df_interp = pd.read_csv(path+'/'+[x for x in os.listdir(path) if 'interp_v2.csv' in x][0])
     df_interp.rename(columns={'Unnamed: 0':'time'},inplace=True)
     df_raw.rename(columns={'Unnamed: 0':'time'},inplace=True)
     df_interp.sort_values(by=['time'],inplace=True)
@@ -65,8 +65,8 @@ def normalize_ifrap(df_wapl:pd.DataFrame)->None:
     counter = 0
     for n in df_wapl.nucleus.unique():
         counter +=1
-        mean = df_wapl[(df_wapl.nucleus == n)&(df_wapl.time == 5)].interpolated_values_unbleached - df_wapl[(df_wapl.nucleus == n)&(df_wapl.time ==5)].interpolated_values_bleached  
-        mean_r = df_wapl[(df_wapl.nucleus == n)&(df_wapl.time == 5)].unfrap_cell - df_wapl[(df_wapl.nucleus == n)&(df_wapl.time ==5)].interpolated_values_background
+        mean = df_wapl[(df_wapl.nucleus == n)&(df_wapl.time == 4)].interpolated_values_unbleached - df_wapl[(df_wapl.nucleus == n)&(df_wapl.time ==4)].interpolated_values_bleached  
+        mean_r = df_wapl[(df_wapl.nucleus == n)&(df_wapl.time == 4)].unfrap_cell - df_wapl[(df_wapl.nucleus == n)&(df_wapl.time ==4)].interpolated_values_background
         C = mean/mean_r
         C = C.values[0]
         ifrap = np.abs((df_wapl[(df_wapl.nucleus == n)].interpolated_values_unbleached - df_wapl[(df_wapl.nucleus == n)].interpolated_values_bleached)/(df_wapl[(df_wapl.nucleus == n)].unfrap_cell - df_wapl[(df_wapl.nucleus == n)].interpolated_values_background))/np.abs(C)
@@ -76,7 +76,7 @@ def normalize_ifrap(df_wapl:pd.DataFrame)->None:
 
 def compute_offset(df_wapl:pd.DataFrame)->None:
     """
-    Compute the offset of the iFRAP values of the dataframe for the fitting. THe offset is the mean of the first 5 time points (pre-FRAP)
+    Compute the offset of the iFRAP values of the dataframe for the fitting. The offset is the mean of the first 5 time points (pre-FRAP)
 
     Args:
     df_wapl: pd.DataFrame
@@ -92,11 +92,13 @@ def compute_offset(df_wapl:pd.DataFrame)->None:
         mean_r = df_wapl[(df_wapl.nucleus == n)&(df_wapl.time < 5)].unfrap_cell - df_wapl[(df_wapl.nucleus == n)&(df_wapl.time <5)].interpolated_values_background
         C = mean/mean_r
         C = C.values[0]
-        return np.mean(np.abs(C))
+    return np.mean(np.abs(C))
     
 
-def double_exp(t,a1,k1,k2,offset):
-    return a1*np.exp(-k1*t) + (1-a1)*np.exp(-k2*t)+offset
+def double_exp(t,a1,a2,k1,k2,offset,verbose=False):
+    if verbose:
+        print(f"a1: {a1}, k1: {k1}, k2: {k2}, offset: {offset}")
+    return a1*np.exp(-k1*t) + (a2)*np.exp(-k2*t)+offset
 
 def fit_df(df,offset) -> tuple:
     """
