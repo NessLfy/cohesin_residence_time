@@ -5,7 +5,7 @@ from glob import glob
 import os
 import tifffile as tiff
 from tqdm import tqdm
-from interactive_analysis_utils import zoomed_image
+from .interactive_analysis_utils import zoomed_image
 
 def interpolate(x_to_interp:np.array,y_to_interp:np.array, im_crop:np.array,radius:int,df_roi:pd.DataFrame):
     # Define the new x values
@@ -184,14 +184,14 @@ def perform_analysis(file_path:str) -> pd.DataFrame:
     """
     Perform analysis on the data from the given file path.
 
-    This function reads various data files, performs interpolation and iFRAP calculations for each nucleus, and returns the results in a DataFrame.
+    This function reads various data files, performs interpolation and mean_list_interp_bleached_flat calculations for each nucleus, and returns the results in a DataFrame.
 
     Args:
     file_path (str): The path to the directory containing the data files.
 
     Returns:
 
-    pd.DataFrame: A DataFrame containing the iFRAP values, interpolated values for bleached and unbleached regions, background intensity, unfrap cell values, nucleus number, and frame number for each nucleus and frame.
+    pd.DataFrame: A DataFrame containing the mean_list_interp_bleached_flat values, interpolated values for bleached and unbleached regions, background intensity, unfrap cell values, nucleus number, and frame number for each nucleus and frame.
     """
     # parse_files
     list_log, list_ROI, list_raw, list_back,list_bleach = parse_files(file_path)
@@ -211,9 +211,6 @@ def perform_analysis(file_path:str) -> pd.DataFrame:
     im = tiff.imread(im_path)
     shape = (np.shape(im)[0], len(df_roi.nucleus.unique()))
     mean_list_interp_unbleached,mean_list_interp_bleached = list(map(lambda _: np.zeros(shape), range(2)))
-
-    # interpolate +iFRAP for every nuclei
-    iFRAP = np.zeros(((np.shape(im)[0]),len(df_roi.nucleus.unique())))
     
     for nucleus in tqdm(df_roi.nucleus.unique()):
         if len(df_roi.nucleus.unique()) == 1:
@@ -226,26 +223,22 @@ def perform_analysis(file_path:str) -> pd.DataFrame:
         im_crop = zoomed_image(_,im, c, bbox)
         mean_list_interp_unbleached[:,nucleus] = interpolate(x_un[:,nucleus],y_un[:,nucleus],im_crop,radius_unbleached,df_roi)
         mean_list_interp_bleached[:,nucleus] = interpolate(x_bleached[:,nucleus],y_bleached[:,nucleus],im_crop,radius_bleached,df_roi)
-        iFRAP[:,nucleus] = (mean_list_interp_unbleached[:,nucleus]-mean_list_interp_bleached[:,nucleus])/(unfrap_cell - background_int)
         
-    iFRAP_flat = iFRAP.T.ravel() # note that the .T is used to transpose the array so that the concatenation by the ravel happens in the right order
     mean_list_interp_bleached_flat = mean_list_interp_bleached.T.ravel()
     mean_list_interp_unbleached_flat = mean_list_interp_unbleached.T.ravel()
 
     # Create a DataFrame for easier readability
     df = pd.DataFrame({
-        'iFRAP': iFRAP_flat,
         'mean_list_interp_bleached': mean_list_interp_bleached_flat,
         'mean_list_interp_unbleached': mean_list_interp_unbleached_flat,
-        'background_int': np.repeat(background_int, np.shape(iFRAP)[1]),
-        'unfrap_cell': np.repeat(unfrap_cell, np.shape(iFRAP)[1]),
-        'nucleus': np.repeat(range(iFRAP.shape[1]), iFRAP.shape[0]),
-        'frame': np.tile(range(iFRAP.shape[0]), iFRAP.shape[1])
+        'background_int': np.repeat(background_int, len(df_roi.nucleus.unique())),
+        'unfrap_cell': np.repeat(unfrap_cell, len(df_roi.nucleus.unique())),
+        'nucleus': np.repeat(range(len(df_roi.nucleus.unique())),np.shape(im)[0]),
+        'frame': np.tile(range(np.shape(im)[0]), len(df_roi.nucleus.unique()))
     })
-    
     return  df
 
-def concat_runs(pattern:list, path:str = '/Users/louaness/Documents/cohesin_residence_time/runs/')->pd.DataFrame:
+def concat_runs(pattern:list, condition:str,path:str = '../runs/',nuclei_to_exclude:pd.DataFrame='../scratchpad/data/nuclei_wrong.csv')->pd.DataFrame:
     """
     Concatenate all the runs from the path and return the dataframe
 
@@ -253,12 +246,23 @@ def concat_runs(pattern:list, path:str = '/Users/louaness/Documents/cohesin_resi
 
     pattern: list
         List of strings to match the files
+    
+    condition: str
+        Experimental condition to match the nuclei to exclude
 
     path: str
         Path to the runs
+
+    nuclei_to_exclude: pd.DataFrame
+        DataFrame containing the nuclei to exclude from the analysis
+
+    
     """
-    df_wapl_d = []
+    df_interp_d = []
     list_files = os.listdir(path)
+    nuclei_to_exclude = pd.read_csv(nuclei_to_exclude)
+    nuclei_condition = nuclei_to_exclude[condition].dropna(how='all').values.tolist()
+
     for l,i in enumerate(list_files):
         counter = 0
         for pat in pattern:
@@ -268,35 +272,14 @@ def concat_runs(pattern:list, path:str = '/Users/louaness/Documents/cohesin_resi
             path_df = path+i
             try:
                 print(f'Processing the file {i}')
-                df_interp_wapl = perform_analysis(path_df)
-                df_interp_wapl['nucleus'] = df_interp_wapl['nucleus'] + (10*l)
-                df_interp_wapl['replicate'] = i
-                df_wapl_d.append(df_interp_wapl)
+                df_interp = perform_analysis(path_df)
+                df_interp['nucleus'] = df_interp['nucleus'] + (10*l)
+                df_interp['replicate'] = i
+                df_interp = df_interp[~df_interp['nucleus'].isin(nuclei_condition)]
+                df_interp_d.append(df_interp)
             except IndexError as e:
                 print(f'Error, the file {i} could not be opened, might not contain data or is not analized yet.')
                 continue
 
-    df_wapl_d = pd.concat(df_wapl_d)
-    return df_wapl_d
-
-def normalize_ifrap(df_list:pd.DataFrame)->None:
-    """
-    Normalize the iFRAP values of the dataframe
-
-    Args:
-    df_wapl: pd.DataFrame
-        Dataframe with the iFRAP values
-    !! This function modifies the dataframe inplace
-    """
-    counter = 0
-    for n in df_list.nucleus.unique():
-        counter +=1
-        mean = df_list[(df_list.nucleus == n)&(df_list.frame == 5)].mean_list_interp_unbleached - df_list[(df_list.nucleus == n)&(df_list.frame ==5)].mean_list_interp_bleached  
-        mean_r = df_list[(df_list.nucleus == n)&(df_list.frame == 5)].unfrap_cell #- df_list[(df_list.nucleus == n)&(df_list.frame ==5)].background_int
-        C = mean/mean_r
-        C = C.values[0]
-        #ifrap = np.abs((df_list[(df_list.nucleus == n)].mean_list_interp_unbleached - df_list[(df_list.nucleus == n)].mean_list_interp_bleached)/(df_list[(df_list.nucleus == n)].unfrap_cell - df_list[(df_list.nucleus == n)].background_int))/np.abs(C)
-        ifrap = np.abs((df_list[(df_list.nucleus == n)].mean_list_interp_unbleached - df_list[(df_list.nucleus == n)].mean_list_interp_bleached)/(df_list[(df_list.nucleus == n)].unfrap_cell))/np.abs(C)
-
-        ifrap = ifrap.values
-        df_list.loc[df_list['nucleus'] == n, 'iFRAP'] = ifrap
+    df_interp_d = pd.concat(df_interp_d)
+    return df_interp_d
