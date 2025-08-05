@@ -7,7 +7,7 @@ frame_pre_bleach:
 - 3
 - 4
 - 249
-im_path: /Volumes/tungsten/scratch/ggiorget/nessim/microscopy_data/FRAP_Rad21_halo/20240222_FRAP_NIPBL_FKBP_WT/202402202_FRAP_Rad21_WT_LP_30_1_conf561Triple-LP-FRAP.ome.tf2
+im_path:#Path to the image .ome.tf2 file
 name_of_experiment: 20240222_FRAP_RAD21_WT_LP_30
 radius_bleach_spot: 7
 radius_unbleach_spot: 5
