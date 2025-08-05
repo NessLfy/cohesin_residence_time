@@ -105,11 +105,7 @@ The shape of the cropped image is logged.
     - Create new x values for interpolation: A new array of x values is created, ranging from 0 to the number of frames in the image.
 
     - Interpolate the data at new x values: The interpolation functions are used to interpolate the data at the new x values. The interpolated values are stored in `interpolated_values_unbleached`, `interpolated_values_bleached`, and `interpolated_values_background`.
-
-    - Compute the iFRAP curve: The iFRAP curve is computed as the difference between the interpolated values of the unbleached and bleached spots, divided by the difference between the mean intensity of the bleached cells and the interpolated values of the background.
-
-    - Append the iFRAP curve to the ifrap list: The computed iFRAP curve is appended to the `ifrap` list.
-
+    
     - Create dataframes for the raw and interpolated data: Two dataframes are created, one for the raw data and one for the interpolated data. The dataframes contain the mean intensity lists and the interpolated values for the unbleached spot, the bleached spot, and the background. They also contain a column for the nucleus index and a column for the mean intensity of the unfrapped cells.
 
     - Append the dataframes to the `df_list_raw` and `df_list_interp` lists: The created dataframes are appended to the df_list_raw and df_list_interp lists.
