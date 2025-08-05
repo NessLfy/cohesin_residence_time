@@ -5,8 +5,6 @@ from glob import glob
 import os
 import tifffile as tiff
 from tqdm import tqdm
-import sys
-sys.path.insert(0,"/Users/louaness/Documents/cohesin_residence_time/ipa/utils/")
 from interactive_analysis_utils import zoomed_image
 
 def interpolate(x_to_interp:np.array,y_to_interp:np.array, im_crop:np.array,radius:int,df_roi:pd.DataFrame):
