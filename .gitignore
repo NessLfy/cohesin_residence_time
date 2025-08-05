@@ -224,16 +224,10 @@ scratchpad/test_interactive.py
 
 /runs/20240116_NIPBL_FKBP_nodtag_30_LP_1/20240116_NIPBL_FKBP_nodtag_30_LP_1_int_im.tif
 /runs/20240116_NIPBL_FKBP_nodtag_40_LP/20240116_NIPBL_FKBP_nodtag_int_im.tif
-/scratchpad/test_yaml.yml
-/scratchpad/test_analysis_FRAP.ipynb
-/scratchpad/analyze_data_exploratory.ipynb
-/scratchpad/combine_sequence_files.ipynb
 plots/
 presentations/
 /ipa/run_analysis_interpolation_test.py
-/scratchpad/test_interpolation.ipynb
 /runs/20240207_FRAP_NIPBL_FKBP_6hdtag_LP_30_s1_interpolation/*
-/scratchpad/test_interpolation_clean.ipynb
 /scratchpad/*
 runs/20240124_NIPBL_FKBP_nodtag_30_LP_2/tests/20240124_NIPBL_FKBP_noaux_30_LP_2_interp_v2.csv
 runs/20240124_NIPBL_FKBP_nodtag_30_LP_2/tests/20240124_NIPBL_FKBP_noaux_30_LP_2_interp.csv
