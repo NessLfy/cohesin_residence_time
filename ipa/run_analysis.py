@@ -14,8 +14,7 @@ from interactive_analysis_utils import zoomed_image, compute_lab, overlap, _crea
 import questionary
 
 import pandas as pd
-# DEBUG
-# import cProfile
+import secrets
 
 def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
          radius_unbleach_spot:int,radius_bleach_spot:int,
@@ -51,6 +50,8 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
     logger.info(f"Radius bleach spot: {radius_bleach_spot}\n")
 
     logger.info(f"Loading image: {im_path}\n")
+
+    token = secrets.token_hex(6)  # generate a random token to avoid overwriting files
 
     # Load the image
 
@@ -137,7 +138,51 @@ def main(im_path:str,FRAP_frame:str,size_of_bbox_zoom:int,
         for frame in tqdm(range(np.shape(int_im)[0])):
             intensity_bleach[index][frame] = np.mean(int_im[frame,...][int_im[frame,...]>0]) #compute the mean intensity of the masked image without the background (0)
 
+    np.save(save_path.split('/')[-1]+f'_intensity_bleach_{token}.npy',intensity_bleach)
+
     logger.info(f'mean unfrapped cell intensity: {intensity_bleach}\n')
+
+    # Analyze background level of the image
+
+    print('Start by measuring background level, select a region without any cells')
+
+    fig,ax = plt.subplots(1,3,figsize=(20,5))
+    ax[0].imshow(im[0,...],cmap='viridis')
+    ax[1].imshow(im[FRAP_frame,...],cmap='viridis')
+    ax[2].imshow(im[-1,...],cmap='viridis')
+    ax[0].set_title('pre-FRAP image')
+    ax[1].set_title('post-FRAP image')
+    ax[2].set_title('Last frame')
+
+    for a in ax:
+        a.axis('off')
+
+    fig.tight_layout()
+
+    if plt.waitforbuttonpress() == False:
+        coords = plt.ginput(1)
+        plt.close()
+
+    coords = [int(x) for x in coords[0]]
+
+    radius_back  = 7
+
+    height, width = im[0,...].shape
+
+    x,y = coords
+
+    y_indices, x_indices = np.ogrid[:height, :width]
+
+    # Create a binary mask where the pixels inside the circle are True
+    mask_back = (x_indices - x)**2 + (y_indices - y)**2 <= radius_back**2
+
+    # Use the mask to index into the image and extract the pixel values (for every frame)
+    pixels_back = [im[i,...][mask_back] for i in range(im.shape[0])]
+    
+    # save the mask with the background intensity
+
+    np.save(save_path.split('/')[-1]+'_mask_back_'+token+'.npy',pixels_back)
+
 
     # start analyzing the FRAPed cells
     number = questionary.path('How many cells (ROIs) do you want to analyze?').ask()
