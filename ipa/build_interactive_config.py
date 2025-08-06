@@ -32,7 +32,7 @@ def main() -> None:
     if FRAP_frame == "": FRAP_frame = 4
 
     im_path = questionary.path("Path to image:").ask()
-    if im_path == "": im_path = "/Volumes/tungsten/scratch/ggiorget/nessim/microscopy_data/FRAP_Rad21_halo/20231124_FRAP_WAPL_AID_NIPBL_FKBP/20231124_FRAP_NIPBL_FKBP_Rad21_Halo_561_1_conf561Triple-LP-FRAP.ome.tf2"
+    if im_path == "": raise ValueError("Path to image cannot be empty. Please provide a valid path.")
     
     size_of_bbox_zoom = questionary.path("Size of bbox zoom:").ask()
     if size_of_bbox_zoom == "": size_of_bbox_zoom = 100
@@ -53,12 +53,8 @@ def main() -> None:
     if radius_bleach_spot == "": radius_bleach_spot = 7
     else: radius_bleach_spot = int(radius_bleach_spot)
 
-    interpolation_values = questionary.path("Interpolation values:").ask()
-    if interpolation_values == "": interpolation_values =  [0,1,2,3,5, 24, 49, 74, 99, 124, 149, 174, 199, 224, 249]
-    if frame_actualization == 10 : interpolation_values = [0, 1, 2, 3, 5, 14, 24, 34, 44, 54, 64, 74, 84, 94, 104, 114, 124, 134, 144, 154, 164, 174, 184, 194, 204, 214, 224, 234, 244, 249]
-
     save_path = questionary.path("Save path:").ask()
-    if save_path == "": save_path = '/Users/louaness/Documents/cohesin_residence_time/runs/'
+    if save_path == "": raise ValueError("Save path cannot be empty. Please provide a valid path.")
     
     confi = os.path.join(save_path,name_of_experiment ,CONFIG_NAME)
 
@@ -71,7 +67,6 @@ def main() -> None:
         "frame_pre_bleach": frame_pre_bleach,
         "radius_unbleach_spot": radius_unbleach_spot,
         "radius_bleach_spot": radius_bleach_spot,
-        #"interpolation_values": interpolation_values,
         "save_path": os.path.join(save_path,name_of_experiment)
     }
 
