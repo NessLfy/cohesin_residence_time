@@ -9,7 +9,7 @@ This is a repository to analyse inversed fluorescence recovery after photobleach
 * `infrastructure`: Contains detailed installation instructions for all requried tools.
 * `ipa`: Contains all image-processing-and-analysis (ipa) scripts which are used for this project to generate final results.
 * `runs`: Contains all config files which were used as inputs to the scripts in `ipa`.
-* `scratchpad`: Contains everything that is nice to keep track of, but which is not used for any final results.
+* `notebooks`: Contains all analysis notebooks with the results from the `runs`.
 
 ## Setup
 Detailed install instructions can be found in [infrastructure/README.md](infrastructure/README.md).
