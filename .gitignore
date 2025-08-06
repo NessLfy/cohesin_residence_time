@@ -213,7 +213,6 @@ $RECYCLE.BIN/
 # infrastructure
 infrastructure/apps/**/
 
-scratchpad/test_interactive.py
 
 /runs/example/ifrap_testing.npy
 
@@ -228,7 +227,7 @@ plots/
 presentations/
 /ipa/run_analysis_interpolation_test.py
 /runs/20240207_FRAP_NIPBL_FKBP_6hdtag_LP_30_s1_interpolation/*
-/scratchpad/*
+/notebooks/*
 runs/20240124_NIPBL_FKBP_nodtag_30_LP_2/tests/20240124_NIPBL_FKBP_noaux_30_LP_2_interp_v2.csv
 runs/20240124_NIPBL_FKBP_nodtag_30_LP_2/tests/20240124_NIPBL_FKBP_noaux_30_LP_2_interp.csv
 runs/20240124_NIPBL_FKBP_nodtag_30_LP_2/tests/20240124_NIPBL_FKBP_noaux_30_LP_2_raw_v2.csv
