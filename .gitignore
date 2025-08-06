@@ -236,3 +236,4 @@ runs/20240124_NIPBL_FKBP_nodtag_30_LP_2/tests/20240124_NIPBL_FKBP_noaux_30_LP_2.
 
 runs/*/config_file_backup.yml
 rename_config.sh
+ipa/run_analysis_old.py

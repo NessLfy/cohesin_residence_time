@@ -16,8 +16,8 @@ Once executed the program will ask for the following questions:
     - This parameter corresponds to the number of the frame in which the FRAP occured (starting to count at 1). Although the frame of the FRAP is not recorded on the microscope, this parameter is useful to display the pre/post FRAP frames when selecting the ROIs. If no parameter is inputed the default value will be 4.
 
 - Path to image:
-    - This parameter corresponds to the path to the image to process (absolute). If no value is inputed the default is /Volumes/tungsten/scratch/ggiorget/nessim/microscopy_data/FRAP_Rad21_halo/20231124_FRAP_WAPL_AID_NIPBL_FKBP/20231124_FRAP_NIPBL_FKBP_Rad21_Halo_561_1_conf561Triple-LP-FRAP.ome.tf2
-
+    - This parameter corresponds to the path to the image to process.
+    
 - Size of bbox zoom:
     - This parameter corresponds to the size of the bounding box for zooming in on the image around the  cell of interest. If no value is inputed, the default size will be 100.
 

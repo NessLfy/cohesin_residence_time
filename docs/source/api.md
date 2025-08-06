@@ -24,10 +24,3 @@
 .. automodule:: ipa.run_analysis
     :members:
 ```
-
-## Analyze the data
-
-```{eval-rst}
-.. automodule:: ipa.utils.analysis_utils
-    :members:
-```
