@@ -6,14 +6,10 @@ import matplotlib
 matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-# from scipy.interpolate import interp1d
-import sys
 import os
-sys.path.insert(0,"/Users/louaness/Documents/cohesin_residence_time/ipa/utils/")
-from interactive_analysis_utils import zoomed_image, compute_lab, overlap, _create_logger # type: ignore
+from utils.interactive_analysis_utils import zoomed_image, compute_lab, overlap, _create_logger # type: ignore
 import questionary
 import secrets
-
 import pandas as pd
 # DEBUG
 # import cProfile
